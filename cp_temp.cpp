@@ -28,13 +28,16 @@ const int MOD = 1e9 + 7;
 #define nl '\n'
 #define precise(x) fixed << setprecision(x)
 
+void solve(){
+   
+}
 signed main() {
     fast;
     
     int t=1;
     cin >> t;
     while (t--) {
-        
+     solve();      
 
     }
 }
