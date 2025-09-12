@@ -1,0 +1,120 @@
+//shikijuki and power grid cf
+int sz[N];
+int parent[N];
+void make(int n)
+{
+    parent[n] = n;
+    sz[n] = 1;
+}
+int find(int v)
+{
+    if (parent[v] == v)
+        return v;
+    return parent[v] = find(parent[v]);
+}
+void Union(int a, int b)
+{
+    a = find(a);
+    b = find(b);
+    if (a != b)
+    {
+        if (sz[a] < sz[b])
+        {
+ 
+            swap(a, b);
+        }
+        parent[b] = a;
+        sz[a] += sz[b];
+        sz[b] = 0;
+    }
+}
+ 
+int calculate_edge_cost(int x1,int y1, int x2, int y2,int k1, int k2){
+    return (abs(x1-x2)+abs(y1-y2))*(k1+k2);
+}
+ 
+void solve()
+{
+    int n;
+    cin >> n;
+    vector<pair<int, int>> in(n + 1);
+    make(0);//dummy node;
+    rep(i, 1, n + 1)
+    {
+        make(i);
+        int x, y;
+        cin >> x >> y;
+        in[i]=make_pair(x,y);
+    }
+    vector<pair<int,pair<int,int>>>in_pair;
+    // map<int,int> build_cost;
+    vi connect_cost(n+1);
+    int min_cost = INT_MAX;
+    int min_idx;
+    rep(i,1,n+1){
+        int cst;
+        cin >>cst;
+        in_pair.pb({cst,{0,i}});
+        if(cst<min_cost){
+            min_cost=cst;
+            min_idx=i;
+        }
+        // build_cost[i]=cst;
+    }
+    rep(i,1,n+1){
+        cin >>connect_cost[i];
+    }
+    rep(i,1,n+1){
+        rep(j,i+1,n+1){
+            if(i==j)continue;
+            in_pair.pb({calculate_edge_cost(in[i].first,in[i].second, in[j].first, in[j].second, connect_cost[i],connect_cost[j]), {i,j}});
+        }
+    }
+    sort(all(in_pair));
+    int cost =0;
+ 
+    vi build_ans;
+    vpi con_ans;
+    // cost+=min_cost;
+    // build_ans.pb(min_idx);
+    // Union(0,min_idx);
+ 
+    for(auto &edge: in_pair){
+        int wt = edge.first;
+        int u = edge.second.first;
+        int v = edge.second.second;
+        if(find(u)==find(v))continue;
+        Union(u,v);
+        if(u==0){
+            cost+=wt;
+            build_ans.pb(v);
+        }
+        else{
+            cost+=wt;
+            con_ans.pb({u,v});
+        }
+    }
+    cout<<cost<<nl;
+    cout<<build_ans.size()<<nl;
+    rep(i,0,build_ans.size()){
+        cout<<build_ans[i]<<" ";
+    }
+    cout<<nl;
+    cout<<con_ans.size()<<nl;
+    rep(i,0,con_ans.size()){
+        cout<<con_ans[i].first<<" "<<con_ans[i].second<<nl;
+    }
+ 
+ 
+}
+signed main()
+{
+    fast;
+ 
+    int t = 1;
+    // cin >> t;
+    while (t--)
+    {
+        solve();
+    }
+}
