@@ -98,6 +98,7 @@ int inverse_mod(int a, int m){
     }
 }
 
+
 template <class T>
 using vv = vector<vector<T>>;
 template <class T>
@@ -246,11 +247,34 @@ void debug_print_array(vector<T> &arr)
     }
     cerr << endl;
 }
+const int N = 1e6 + 10;
+vi factorial(N);
+vi inv(N);
+void compute_factorials()
+{
+    factorial[0] = 1;
+    for (int i = 1; i < N; i++)
+    {
+        factorial[i] = (factorial[i - 1] * i) % MOD;
+    }
+    inv[N - 1] = binExp(factorial[N - 1], MOD - 2);
+    for (int i = N - 2; i >= 0; i--)
+    {
+        inv[i] = (inv[i + 1] * (i + 1)) % MOD;
+    }
+}
+int ncr(int n, int r)
+{
+    if (r > n || r < 0)
+        return 0;
+ 
+    return (binMul(factorial[n], binMul(inv[r], inv[n - r], MOD), MOD));
+}
 
 //================ Code starts here ================
 void solve()
 {
-
+  
 }
 
 signed main()
