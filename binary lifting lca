@@ -43,8 +43,69 @@ public:
     }
 };
 
-/**
- * Your TreeAncestor object will be instantiated and called as such:
- * TreeAncestor* obj = new TreeAncestor(n, parent);
- * int param_1 = obj->getKthAncestor(node,k);
- */
+
+// getting lca code
+const int maxN = 2e5+10;
+vi depth(maxN);
+vvi children(maxN);
+const int LOG = 20;
+vvi up(maxN, vi(LOG));
+
+void dfs_find_up(int n){
+    for(int v: children[n]){
+        up[v][0]=n;//n is parent of v
+        depth[v]=depth[n]+1;
+        for(int j=1;j<LOG; j++){
+            up[v][j]=up[up[v][j-1]][j-1];
+        }
+        dfs_find_up(v);
+    }
+}
+int get_lca(int u, int v){
+    if(depth[u]<depth[v]){
+        swap(u,v);
+    }
+    int k = depth[u]-depth[v];
+    for(int j=LOG-1; j>=0; j--){
+        if(k&(1<<j)){
+            u=up[u][j];//going to kth ancestor
+        }
+    }
+    if(u==v)return v;//v is the parent of u, so lca(u,v)=v
+    //now they are on the same level.. we will take them to just below the lca
+    for(int j=LOG-1; j>=0; j--){
+        if(up[u][j]!=up[v][j]){
+            //those ancestors are not the same, so below the lca
+            u= up[u][j];
+            v = up[v][j];
+        }
+    }
+    //now they are just below lca
+    return up[u][0];//or up[v][0];
+}
+
+
+//================ Code starts here ================
+void solve()
+{
+  int n;
+  cin >>n;
+  rep(i,0,n){
+    int m;
+    cin >>m;
+    dfs_find_up(0);//don't forget..
+    while(m--){
+        int child;
+        cin >>child;
+        children[i].pb(child);
+    }
+  }
+
+  int q;
+  cin>>q;
+  while(q--){
+    int u,v;
+    cin >>u>>v;
+    cout<<get_lca(u,v)<<nl;
+  }
+}
