@@ -1,3 +1,86 @@
+//spoj-dquery
+struct query{
+    int l,r,i;
+};
+query Q[200001];
+int ans[200001];
+int freq[1000001];
+int ar[30001];
+int cnt =0;
+bool cmp(query a, query b){
+    if(a.l/BLK!=b.l/BLK){
+        return a.l/BLK<b.l/BLK;//starting pos kon block tar regard e sort
+    }
+    return a.r/BLK <b.r/BLK;
+}
+void add(int pos){
+    freq[ar[pos]]++;
+    if(freq[ar[pos]]==1)cnt++;
+}
+void remove(int pos){
+    freq[ar[pos]]--;
+    if(freq[ar[pos]]==0)cnt--;
+}
+
+//================ Code starts here ================
+void solve()
+{
+  int n;
+  cin >>n;
+  rep(i,0,n){
+    cin>>ar[i];
+  }
+
+  int q;
+  cin>>q;
+  rep(i,0,q){
+    cin>>Q[i].l>>Q[i].r;
+    Q[i].l--;
+    Q[i].r--;//0 based
+    Q[i].i= i;
+  }
+  sort(Q,Q+q,cmp);
+  int ML=0, MR=-1;//because initially no range
+  rep(i,0,q){
+    int L =Q[i].l;
+    int R = Q[i].r;
+    //since we sorted the queries, we will move from previous range to current range
+    //we will only move ML forward and MR forward or backward
+    //removing
+    while(ML<L){
+        ML++;
+        remove(ML-1);
+    }
+    while(MR>R){
+        remove(MR);
+        MR--;
+    }
+    //adding
+    //ML will never be greater than L
+    while(MR<R){
+        MR++;
+        add(MR);
+    }
+    while(ML>L){
+        ML--;
+        add(ML);
+    }//why do we need this while loop even though L is sorted in increasing order?
+    //because within same block, L can be in any order
+    ans[Q[i].i]=cnt;
+  }
+
+  rep(i,0,q){
+    cout<<ans[i]<<nl;
+  }
+
+}
+
+
+
+
+
+
+
 //holes cf
 #include <bits/stdc++.h>
  
@@ -61,3 +144,249 @@ int main() {
         }
     }
 }
+
+//update x with y, move smaller to bigger set..#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);   // Disable synchronization for faster input/output
+    cin.tie(nullptr);              // Untie cin from cout to avoid unnecessary flushes
+
+    int N, Q;
+    cin >> N >> Q;                // Read the size of the array and number of queries
+
+    vector<long long> a(N + 1);    // Array to store the values, 1-indexed
+    unordered_map<long long, unordered_set<int>> pos;  // Map to store sets of indices for each value
+    pos.reserve(N * 2);           // Reserve space for the map to avoid rehashing
+
+    // Fill the array and the map
+    for (int i = 1; i <= N; i++) {
+        cin >> a[i];              // Read the value at each index
+        pos[a[i]].insert(i);      // Insert the index into the set of the value
+    }
+
+    // Process each query
+    while (Q--) {
+        int type;
+        cin >> type;             // Read the type of query (1 or 2)
+
+        if (type == 1) {
+            long long X, Y;
+            cin >> X >> Y;       // Read the values for the type 1 query
+
+            if (X == Y) continue; // If X == Y, no change is needed
+
+            auto &sx = pos[X];    // Set of indices for value X
+            auto &sy = pos[Y];    // Set of indices for value Y
+
+            if (sx.empty()) continue;  // If no indices hold value X, continue
+
+            // Always merge the smaller set into the larger one
+            if (sx.size() > sy.size()) {
+                swap(sx, sy);         // Swap the sets if X's set is larger
+                swap(X, Y);           // Swap the values too to maintain consistency
+            }
+
+            // Move each index from X's set into Y's set and update a[idx] = Y
+            for (int idx : sx) {
+                a[idx] = Y;           // Update the value at the index
+                sy.insert(idx);       // Insert the index into the Y's set
+            }
+            sx.clear();               // X no longer holds any indices
+
+        } else if (type == 2) {
+            int idx;
+            cin >> idx;              // Read the index for type 2 query
+            cout << a[idx] << '\n';   // Output the value at the given index
+        }
+    }
+
+    return 0;
+}
+
+//range minimum query
+int getMin(int l, int r)
+{
+    int LB = l / BLK;
+    int RB = r / BLK;
+    int mn = INT_MAX;
+
+    if (LB == RB)
+        for (int i = l; i <= r; i++)
+            mn = min(ar[i], mn);
+    else
+    {
+        for (int i = l; i < (LB + 1) * BLK; i++)
+            mn = min(mn, ar[i]);
+
+        for (int i = LB + 1; i < RB; i++)
+            mn = min(mn, F[i]);
+
+        for (int i = RB * BLK; i <= r; i++)
+            mn = min(mn, ar[i]);
+    }
+
+    return mn;
+}
+
+
+
+
+
+
+
+// update buckets with min value, 2 types query - sqrt decompostion
+#include <iostream>
+#include <cmath>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+class SquareRootDecomposition {
+private:
+    vector<int> arr;       // Original array
+    vector<vector<int>> blocks; // Blocks array to store the elements of blocks (sorted)
+    vector<int> lazy;      // Lazy propagation array
+    int n;                 // Size of the array
+    int block_size;        // Size of each block (approximately sqrt(n))
+
+public:
+    // Constructor to initialize the array and blocks
+    SquareRootDecomposition(int n, vector<int>& input_arr) {
+        this->n = n;
+        this->arr = input_arr;
+        block_size = (int)sqrt(n);  // Block size is sqrt(n)
+        blocks = vector<vector<int>>((n + block_size - 1) / block_size);
+        lazy = vector<int>((n + block_size - 1) / block_size, -1);  // Initialize lazy array to -1 (no updates yet)
+
+        // Precompute blocks and sort each block
+        for (int i = 0; i < n; i++) {
+            blocks[i / block_size].push_back(arr[i]);
+        }
+
+        for (int i = 0; i < blocks.size(); i++) {
+            sort(blocks[i].begin(), blocks[i].end());  // Sort each block
+        }
+    }
+
+    // Helper function to apply lazy propagation to the block
+    void applyLazy(int block_idx) {
+        if (lazy[block_idx] == -1) return;
+
+        // Apply the pending lazy update to the block
+        int start = block_idx * block_size;
+        int end = min(start + block_size, n);
+        for (int i = start; i < end; i++) {
+            arr[i] = min(arr[i], lazy[block_idx]);  // Update each element in the block
+        }
+
+        // Recompute the block after applying the update
+        blocks[block_idx].clear();
+        for (int i = start; i < end; i++) {
+            blocks[block_idx].push_back(arr[i]);
+        }
+
+        // Sort the block after update
+        sort(blocks[block_idx].begin(), blocks[block_idx].end());
+
+        // Clear the lazy value for this block (no more pending updates)
+        lazy[block_idx] = -1;
+    }
+
+    // Update the range [L, R] by applying min(A[i], X) for each i
+    void update(int L, int R, int X) {
+        int start_block = L / block_size;
+        int end_block = R / block_size;
+
+        // If the update range is within the same block
+        if (start_block == end_block) {
+            applyLazy(start_block);  // Apply any pending lazy updates
+            for (int i = L; i <= R; i++) {
+                arr[i] = min(arr[i], X);
+                blocks[start_block][i % block_size] = arr[i];
+            }
+            sort(blocks[start_block].begin(), blocks[start_block].end());  // Re-sort the block
+        }
+        else {
+            // Update the first partial block (L to the end of the block)
+            applyLazy(start_block);
+            for (int i = L; i < (start_block + 1) * block_size; i++) {
+                arr[i] = min(arr[i], X);
+                blocks[start_block][i % block_size] = arr[i];
+            }
+            sort(blocks[start_block].begin(), blocks[start_block].end());  // Re-sort the block
+
+            // Update the full blocks in the middle
+            for (int b = start_block + 1; b < end_block; b++) {
+                lazy[b] = min(lazy[b], X);  // Mark the block for lazy update
+            }
+
+            // Update the last partial block (start of the block to R)
+            applyLazy(end_block);
+            for (int i = end_block * block_size; i <= R; i++) {
+                arr[i] = min(arr[i], X);
+                blocks[end_block][i % block_size] = arr[i];
+            }
+            sort(blocks[end_block].begin(), blocks[end_block].end());  // Re-sort the block
+        }
+    }
+
+    // Query the sum of the range [L, R]
+    int query(int L, int R) {
+        int sum = 0;
+        int start_block = L / block_size;
+        int end_block = R / block_size;
+
+        // If the query range is within the same block
+        if (start_block == end_block) {
+            applyLazy(start_block);  // Apply any pending lazy updates
+            for (int i = L; i <= R; i++) {
+                sum += arr[i];
+            }
+        }
+        else {
+            // Sum the first partial block
+            applyLazy(start_block);
+            for (int i = L; i < (start_block + 1) * block_size; i++) {
+                sum += arr[i];
+            }
+
+            // Sum the full blocks in the middle
+            for (int b = start_block + 1; b < end_block; b++) {
+                applyLazy(b);
+                sum += accumulate(blocks[b].begin(), blocks[b].end(), 0);
+            }
+
+            // Sum the last partial block
+            applyLazy(end_block);
+            for (int i = end_block * block_size; i <= R; i++) {
+                sum += arr[i];
+            }
+        }
+        return sum;
+    }
+};
+
+int main() {
+    int n = 10;
+    vector<int> arr = {1, 3, 2, 7, 5, 6, 3, 8, 9, 4};
+
+    SquareRootDecomposition sqd(n, arr);
+
+    // Query sum from index 2 to 8
+    cout << "Initial sum from 2 to 8: " << sqd.query(2, 8) << endl;
+
+    // Update range [3, 7] with min(A[i], 4)
+    sqd.update(3, 7, 4);
+
+    // Query sum again after update
+    cout << "Sum from 2 to 8 after update: " << sqd.query(2, 8) << endl;
+
+    return 0;
+}
+
+
+//mo's algorithm--> from l to r, elem with max frequency, how many of them?
+
+
