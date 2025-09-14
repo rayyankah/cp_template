@@ -261,3 +261,380 @@ void dfs(int node, int parent=-1){
 
 
 
+
+
+//finding bi connected componenets... 
+const int maxN = 1e5 + 10;
+vi adj[maxN];
+si articulation_points;
+int vis[maxN], in[maxN], low[maxN];
+int timer; // initialized to 0
+vector<vector<pair<int, int>>> bcc;
+stack<pi> st;
+void dfs(int node, int parent = -1)
+{
+    vis[node] = 1;
+    in[node] = low[node] = timer++;
+    int children = 0;
+    for (int &child : adj[node])
+    {
+        if (child == parent)
+            continue;
+        if (vis[child])
+        {
+            // back edge
+            if (in[child] < low[node])
+            {
+                st.push({node, child});
+            }
+            low[node] = min(low[node], in[child]);
+        }
+        else
+        {
+            // forward edge
+            st.push({node, child});
+            dfs(child, node);
+            if (low[child] >= in[node] && parent != -1)
+            {
+                vpi curr_bcc;
+                while (st.top() != make_pair(node, child) && st.top() != make_pair(child, node))
+                {
+                    curr_bcc.pb(st.top());
+                    st.pop();
+                }
+                curr_bcc.pb(st.top());
+                st.pop();
+                bcc.pb(curr_bcc);
+            }
+
+            low[node] = min(low[node], low[child]);
+            children++;
+        }
+    }
+    if (parent == -1 && children > 1)
+    {
+        articulation_points.insert(node);
+        vpi curr_bcc;
+        while (!st.empty())
+        {
+            curr_bcc.pb(st.top());
+            st.pop();
+        }
+        bcc.pb(curr_bcc);
+    }
+}
+
+//================ Code starts here ================
+void solve()
+{
+    int n, m;
+    cin >> n >> m;
+    while (m--)
+    {
+        int u, v;
+        cin >> u >> v;
+        adj[u].pb(v);
+        adj[v].pb(u);
+    }
+    for (int i = 1; i <= n; i++)
+    {
+        if (!vis[i])
+        {
+            dfs(i);
+            vpi curr_bcc;
+            while (!st.empty())
+            {
+                curr_bcc.pb(st.top());
+                st.pop();
+            }
+            if (!curr_bcc.empty())
+                bcc.pb(curr_bcc);
+            
+        }
+    }
+    cout << "bcc are:" << nl;
+    for (auto &component : bcc)
+    {
+        for (auto &edge : component)
+        {
+            cout << edge.first << "-" << edge.second << ", ";
+        }
+        cout << nl;
+    }
+}
+
+
+
+
+//how many edges to add to make graph safe: 
+#include <bits/stdc++.h>
+using namespace std;
+
+using vi = vector<int>;
+using vvi = vector<vi>;
+using ll = long long;
+
+const int MAXN = 100000 + 5;
+
+// ---------- Input graph ----------
+int n, m;
+vvi adj;
+
+// ---------- Helpers for connected components (simple DFS) ----------
+vi compOfNode; // which original connected component (1..ccount)
+void mark_connected_components() {
+    compOfNode.assign(n+1, 0);
+    int cid = 0;
+    vector<int> st;
+    for (int s = 1; s <= n; ++s) {
+        if (compOfNode[s]) continue;
+        ++cid;
+        st.clear();
+        st.push_back(s);
+        compOfNode[s] = cid;
+        for (size_t i=0;i<st.size();++i) {
+            int u = st[i];
+            for (int v: adj[u]) if (!compOfNode[v]) {
+                compOfNode[v] = cid;
+                st.push_back(v);
+            }
+        }
+    }
+}
+
+// ================= Bridges & 2-edge-connected components =================
+vi tin_br, low_br;
+int timer_br;
+vector<pair<int,int>> bridges; // list of bridges (u,v) with u<v always
+
+void dfs_bridges(int u, int p) {
+    tin_br[u] = low_br[u] = ++timer_br;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        if (tin_br[v]) {
+            // back edge
+            low_br[u] = min(low_br[u], tin_br[v]);
+        } else {
+            dfs_bridges(v, u);
+            low_br[u] = min(low_br[u], low_br[v]);
+            if (low_br[v] > tin_br[u]) {
+                int a = u, b = v;
+                if (a > b) swap(a,b);
+                bridges.emplace_back(a,b);
+            }
+        }
+    }
+}
+
+// build 2-edge-connected components by skipping bridges
+vi comp2edge; // component id (1..k) for each node
+unordered_set<long long> bridgeSet;
+long long keyPair(int a, int b){ if (a>b) swap(a,b); return ( (long long)a<<32) | (unsigned long long)b; }
+
+void build_bridge_set() {
+    bridgeSet.clear();
+    for (auto &e: bridges) bridgeSet.insert(keyPair(e.first,e.second));
+}
+
+void dfs_assign_comp2edge(int u, int cid) {
+    comp2edge[u] = cid;
+    for (int v: adj[u]) {
+        if (comp2edge[v]) continue;
+        if (bridgeSet.count(keyPair(u,v))) continue; // skip bridge edges
+        dfs_assign_comp2edge(v, cid);
+    }
+}
+
+int solve_min_edges_remove_bridges() {
+    // run Tarjan to collect bridges
+    tin_br.assign(n+1,0);
+    low_br.assign(n+1,0);
+    timer_br = 0;
+    bridges.clear();
+    for (int i=1;i<=n;i++) if (!tin_br[i]) dfs_bridges(i, -1);
+
+    // prepare set for quick check
+    build_bridge_set();
+
+    // assign 2-edge components
+    comp2edge.assign(n+1, 0);
+    int cid = 0;
+    for (int i=1;i<=n;i++) if (!comp2edge[i]) {
+        ++cid;
+        dfs_assign_comp2edge(i, cid);
+    }
+
+    if (cid == 1) return 0; // already no bridges (single component collapsed)
+
+    // compute degree in bridge-tree
+    vi deg(cid+1, 0);
+    for (auto &e: bridges) {
+        int u = e.first, v = e.second;
+        int cu = comp2edge[u], cv = comp2edge[v];
+        if (cu==cv) continue;
+        deg[cu]++; deg[cv]++;
+    }
+
+    // the bridge-tree can be a forest: count leaves per original connected component
+    // group components by original connected component (compOfNode)
+    map<int, vi> compsByConn; // connId -> list of comp2edge ids
+    for (int v = 1; v<=n; ++v) {
+        int conn = compOfNode[v];
+        int c = comp2edge[v];
+        // ensure only push unique comp id once per conn mapping
+        // use last element check to avoid duplicates (cheaper)
+        if (compsByConn[conn].empty() || compsByConn[conn].back()!=c)
+            compsByConn[conn].push_back(c);
+    }
+
+    int answer = 0;
+    for (auto &pr: compsByConn) {
+        auto &vec = pr.second;
+        // unique them (because above approach might have duplicates across visitation)
+        sort(vec.begin(), vec.end());
+        vec.erase(unique(vec.begin(), vec.end()), vec.end());
+        if (vec.size() == 1) continue; // a single contracted node -> already no bridges in that original connected comp
+        int leaves = 0;
+        for (int compId : vec) if (deg[compId] == 1) ++leaves;
+        if (leaves==0) continue;
+        answer += (leaves + 1) / 2;
+    }
+    return answer;
+}
+
+// ================= Vertex-biconnected components (blocks) =================
+vi tin_bcc, low_bcc;
+int timer_bcc;
+vector<pair<int,int>> edgeStack;
+vector<vector<int>> blocks; // list of blocks, each block is a list of vertices
+vector<int> isArt; // 1 if articulation point
+
+void dfs_bcc(int u, int p) {
+    tin_bcc[u] = low_bcc[u] = ++timer_bcc;
+    int children = 0;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        if (!tin_bcc[v]) {
+            // tree edge
+            edgeStack.emplace_back(u,v);
+            ++children;
+            dfs_bcc(v, u);
+            low_bcc[u] = min(low_bcc[u], low_bcc[v]);
+
+            if (low_bcc[v] >= tin_bcc[u]) {
+                // u is articulation for this block (unless u is root handled below)
+                if (p != -1) isArt[u] = 1;
+                // pop edges until (u,v) included
+                vector<int> blockVertices;
+                while (!edgeStack.empty()) {
+                    auto e = edgeStack.back(); edgeStack.pop_back();
+                    blockVertices.push_back(e.first);
+                    blockVertices.push_back(e.second);
+                    if (e.first==u && e.second==v) break;
+                }
+                // deduplicate vertices in block
+                sort(blockVertices.begin(), blockVertices.end());
+                blockVertices.erase(unique(blockVertices.begin(), blockVertices.end()), blockVertices.end());
+                blocks.push_back(blockVertices);
+            }
+        } else if (tin_bcc[v] < tin_bcc[u]) {
+            // back edge to ancestor; push once
+            edgeStack.emplace_back(u,v);
+            low_bcc[u] = min(low_bcc[u], tin_bcc[v]);
+        }
+    }
+    if (p == -1 && children > 1) isArt[u] = 1;
+}
+
+int solve_min_edges_remove_articulation() {
+    // run biconnected algorithm
+    tin_bcc.assign(n+1, 0);
+    low_bcc.assign(n+1, 0);
+    isArt.assign(n+1, 0);
+    timer_bcc = 0;
+    edgeStack.clear();
+    blocks.clear();
+
+    for (int i=1;i<=n;i++) {
+        if (!tin_bcc[i]) {
+            dfs_bcc(i, -1);
+            // after finishing a connected component, there might remain edges (a single block)
+            if (!edgeStack.empty()) {
+                vector<int> blockVertices;
+                while (!edgeStack.empty()) {
+                    auto e = edgeStack.back(); edgeStack.pop_back();
+                    blockVertices.push_back(e.first);
+                    blockVertices.push_back(e.second);
+                }
+                sort(blockVertices.begin(), blockVertices.end());
+                blockVertices.erase(unique(blockVertices.begin(), blockVertices.end()), blockVertices.end());
+                blocks.push_back(blockVertices);
+            }
+        }
+    }
+
+    if (blocks.empty()) return 0; // no edges at all (all isolated vertices) -> 0
+
+    // For each block compute how many articulation points it contains
+    int B = (int)blocks.size();
+    vi degBlock(B, 0);
+    vi connOfBlock(B, 0); // which original connected component the block belongs to
+
+    for (int i=0;i<B;i++) {
+        int connIdForThisBlock = 0;
+        for (int v: blocks[i]) {
+            if (isArt[v]) degBlock[i]++;
+            if (connIdForThisBlock==0) connIdForThisBlock = compOfNode[v];
+        }
+        connOfBlock[i] = connIdForThisBlock;
+    }
+
+    // group blocks by original connected component
+    unordered_map<int, vector<int>> blocksByConn;
+    blocksByConn.reserve(B*2);
+    for (int i=0;i<B;i++) blocksByConn[connOfBlock[i]].push_back(i);
+
+    int answer = 0;
+    for (auto &pr : blocksByConn) {
+        auto &vec = pr.second;
+        if (vec.size() == 1) continue; // single block => already biconnected inside that connected component
+        int leaves = 0;
+        for (int idx : vec) if (degBlock[idx] == 1) ++leaves;
+        if (leaves == 0) continue;
+        answer += (leaves + 1) / 2;
+    }
+    return answer;
+}
+
+// ================= Example driver (read graph, run both) =================
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    // read n, m
+    if (!(cin >> n >> m)) return 0;
+    adj.assign(n+1, {});
+    for (int i=0;i<m;i++){
+        int u,v; cin >> u >> v;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+
+    // mark original connected components (used later)
+    mark_connected_components();
+
+    int edges_to_fix_bridges = solve_min_edges_remove_bridges();
+    int edges_to_fix_articulation = solve_min_edges_remove_articulation();
+
+    cout << "min edges to add to remove ALL bridges (make 2-edge-connected): " << edges_to_fix_bridges << "\n";
+    cout << "min edges to add to remove ALL articulation points (make biconnected): " << edges_to_fix_articulation << "\n";
+
+    return 0;
+}
+
+
+
+
+
+
+
