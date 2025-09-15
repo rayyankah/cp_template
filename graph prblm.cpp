@@ -1158,6 +1158,316 @@ signed main()
 
 
 
+//cf - bertown road
+#include <bits/stdc++.h>
+
+using namespace std;
+#define int long long
+const int inf = 1e18;
+
+struct Bridge {
+    vector<vector<int>> adj, tree, Components;
+    vector<int> low, vis, depth, stack, id;
+    int n;
+    vector<pair<int, int>> bridge;
+
+    Bridge(int n, vector<vector<int>> &adj) :
+            adj(adj), n(n), depth(n + 1), id(n + 1), vis(n + 1), low(n + 1, inf) {
+        build();
+    };
+
+    void dfs(int u, int p) {
+        stack.emplace_back(u);
+        low[u] = depth[u];
+        vis[u] = 1;
+        for (auto v: adj[u]) {
+            if (v == p)continue;
+            if (vis[v]) {
+                low[u] = min(low[u], depth[v]);
+                continue;
+            }
+            depth[v] = depth[u] + 1;
+            dfs(v, u);
+            low[u] = min(low[u], low[v]);
+            if (low[v] > depth[u])
+                bridge.emplace_back(u, v);
+        }
+        if (low[u] == depth[u]) {
+            vector<int> comp;
+            while (stack.back() != u)
+                comp.emplace_back(stack.back()), stack.pop_back();
+            comp.emplace_back(stack.back());
+            stack.pop_back();
+            Components.emplace_back(comp);
+            for (auto v: comp)
+                id[v] = Components.size();
+        }
+    }
+
+    void build() {
+        for (int i = 1; i <= n; ++i)
+            if (!vis[i])
+                dfs(i, 0);
+
+        tree.assign(Components.size() + 1, {});
+        for (int u = 1; u <= n; ++u) {
+            for (auto v: adj[u]) {
+                if (id[u] != id[v])
+                    tree[id[u]].emplace_back(id[v]);
+            }
+        }
+    }
+};
+
+void solve() {
+    int n, m;
+    cin >> n >> m;
+    vector<vector<int>> adj(n + 1);
+    for (int i = 0, u, v; i < m; ++i) {
+        cin >> u >> v;
+        adj[u].emplace_back(v);
+        adj[v].emplace_back(u);
+    }
+    Bridge T(n, adj);
+    if (T.bridge.size())
+        return void(cout << "0\n");
+
+    vector<int> vis(n + 1), depth(n + 1);
+    function<void(int , int )> dfs = [&](int u , int p) {
+        vis[u] = 1;
+        for (auto v: adj[u]) {
+            if(v == p)continue;
+            if (!vis[v]) {
+                cout << u << ' ' << v << '\n';
+                depth[v] = depth[u] + 1;
+                dfs(v , u);
+            } else if (depth[v] < depth[u])
+                cout << u << ' ' << v << '\n';
+        }
+    };
+
+    dfs(1 , 0);
+}
+
+signed main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+#ifdef HALZOOM
+    freopen("Input.txt", "r", stdin);
+    freopen("Output.txt", "w", stdout);
+#endif
+
+    int test = 1;
+//    cin >> test;
+
+    for (int i = 1; i <= test; ++i) {
+        solve();
+    }
+    return 0;
+}
+
+
+
+
+
+//cactus
+#include<bits/stdc++.h>
+using namespace std;
+#define int long long
+const int N=3e5+5,mod=1e9+7;
+vector<int> adj[N];
+int low[N],num[N],id[N],dp[N],val[N],dep[N];
+int timer=1,cnt=1,sz=0;
+bool check[N],vis[N];
+int st[N][35];
+set<pair<int,int>> cau;
+set<int> comp[N];
+map<pair<int,int>,bool> mp,bri;
+void dfs(int u,int p)
+{
+    check[u]=1;
+    low[u]=num[u]=timer++;
+    for(int v:adj[u]){
+        if(v==p) continue;
+        if(check[v]) low[u]=min(low[u],num[v]);
+        else{
+            dfs(v,u);
+            low[u]=min(low[u],low[v]);
+            if(low[v]==num[v]) cau.insert({min(u,v),max(u,v)});
+        }
+    }
+}
+void dfs1(int u)
+{
+    sz++;
+    id[u]=cnt;
+    check[u]=1;
+    for(int v:adj[u]){
+        pair<int,int> e={min(u,v),max(u,v)};
+        if(cau.find(e)!=cau.end()) continue;
+        if(check[v]) continue;
+        dfs1(v);
+    }
+}
+void dfs2(int u,int p)
+{
+    st[u][0]=p;
+    for(int j=1;j<=30;j++){
+        st[u][j]=st[st[u][j-1]][j-1];
+    }
+    for(int v:comp[u]){
+        if(v==p) continue;
+        dp[v]+=dp[u];
+        dep[v]=dep[u]+1;
+        dfs2(v,u);
+    }
+}
+int lca(int u,int v)
+{
+    if(dep[u]<dep[v]) swap(u,v);
+    int kc=dep[u]-dep[v];
+    for(int j=0;j<=30;j++){
+        if((1<<j)&kc) u=st[u][j];
+    }
+    if(u==v) return u;
+    for(int j=30;j>=0;j--){
+        if(st[u][j]!=st[v][j]){
+            u=st[u][j];
+            v=st[v][j];
+        }
+    }
+    return st[u][0];
+}
+int pw(int a,int b)
+{
+    if(b==0) return 1;
+    int res=1;
+    while(b>0){
+        if(b&1) res=1ll*res*a%mod;
+        a=1ll*a*a%mod;
+        b/=2;
+    }
+    return res;
+}
+signed main()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+    int n,m;
+    cin>>n>>m;
+    for(int a=0;a<m;a++){
+        int x,y;
+        cin>>x>>y;
+        adj[x].push_back(y);
+        adj[y].push_back(x);
+    }
+    dfs(1,0);
+    for(int a=0;a<=n;a++){
+        check[a]=0;
+    }
+    for(int a=1;a<=n;a++){
+        if(!check[a]){
+            sz=0;
+            dfs1(a);
+            cnt++;
+            if(sz>1) val[id[a]]=1;
+        }
+    }
+    for(int a=1;a<=n;a++){
+        for(int b:adj[a]){
+            if(id[a]==id[b]) continue;
+            comp[id[a]].insert(id[b]);
+            comp[id[b]].insert(id[a]);
+        }
+    }
+    cnt--;
+    for(int a=1;a<=cnt;a++){
+        dp[a]=val[a];
+    }
+    dfs2(1,0);
+    int q;
+    cin>>q;
+    while(q--){
+        int l,r;
+        cin>>l>>r;
+        int x=id[l],y=id[r];
+        int s=lca(x,y);
+        int ans=dp[x]+dp[y]-2*dp[s]+val[s];
+        cout<<pw(2,ans)<<"\n";
+    }
+}
+
+
+
+//fairy
+#include <bits/stdc++.h>
+using namespace std;
+const int N=10010;
+int n,m,dep[N],fat[14][N],d[N][2],z[2],ans[N],cnt;
+vector<pair<int,int> > ed[N];
+int LCA(int x,int y){
+	if(dep[x]<dep[y]) swap(x,y);
+	int ret=dep[x]-dep[y];
+	for(int i=13;i>=0;i--) if(ret>=(1<<i)) ret-=1<<i,x=fat[i][x];
+	if(x==y) return x;
+	for(int i=13;i>=0;i--) if(fat[i][x]!=fat[i][y]) x=fat[i][x],y=fat[i][y];
+	return fat[0][x];
+}
+void dfs(int x,int fa){
+	dep[x]=dep[fa]+1;fat[0][x]=fa;
+	for(int i=1;i<=13;i++) fat[i][x]=fat[i-1][fat[i-1][x]];
+	for(auto [v,w]:ed[x]){
+		if(v==fa) continue;
+//		cout<<x<<' '<<v<<' '<<dep[v]<<endl;
+		if(!dep[v]) dfs(v,x);
+		else{
+			int lca=LCA(x,v);
+			int c=dep[x]+dep[v]-2*dep[lca]+1;z[c&1]++;
+			d[x][c&1]++;d[v][c&1]++;d[lca][c&1]-=2;
+//			cout<<x<<' '<<v<<' '<<lca<<endl;
+		}
+	}
+}
+bool vis[N];
+void solve(int x,int fa){
+	vis[x]=1;
+	for(auto [v,w]:ed[x]){
+		if(v==fa) continue;
+		if(vis[v]){
+			int lca=LCA(x,v);
+			int c=dep[x]+dep[v]-2*dep[lca]+1;
+			if((c&1)&&z[c&1]==2) ans[++cnt]=w; 
+			continue;
+		}
+		solve(v,x);
+		if(d[v][1]==z[1]&&!d[v][0]) cnt++,ans[cnt]=w;
+		d[x][0]+=d[v][0],d[x][1]+=d[v][1];
+	}
+}
+int main(){
+	ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+	cin>>n>>m;
+	for(int i=1;i<=m;i++){
+		int x,y;cin>>x>>y;
+		ed[x].push_back({y,i});
+		ed[y].push_back({x,i});
+	}
+	for(int i=1;i<=n;i++) if(!dep[i]) dfs(i,0);
+	if(!z[1]){
+		cout<<m<<'\n';
+		for(int i=1;i<=m;i++) cout<<i<<' ';
+		return 0;
+	}
+	for(int i=1;i<=n;i++) if(!vis[i]) solve(i,0);
+	sort(ans+1,ans+cnt+1);cnt=unique(ans+1,ans+cnt+1)-ans-1;
+	cout<<cnt<<'\n';
+	for(int i=1;i<=cnt;i++) cout<<ans[i]<<' ';
+	return 0;
+}
+
+
+
 
 
 
