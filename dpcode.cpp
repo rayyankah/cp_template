@@ -115,7 +115,99 @@ void testcases(){
 
 
 
+//ada and subsequece
+void solve()
+{
+      int N, M;
+    cin >> N >> M;
+    vector<int> cost(26);
+    for (int i = 0; i < 26; i++)
+        cin >> cost[i];
+    string A, B;
+    cin >> A >> B;
+    vector<vector<ll>> dp(N + 1, vector<ll>(M + 1, 0));
+    for (int i = 1; i <= N; i++)
+    {
+        for (int j = 1; j <= M; j++)
+        {
+            if (A[i - 1] == B[j - 1])
+            {
+                dp[i][j] = dp[i - 1][j - 1] + cost[A[i - 1] - 'a'];
+            }
+            else
+            {
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+            }
+        }
+    }
+    // Base cases: dp[0][0] = 0, and dp[i][0] = 0 for all i, dp[0][j] = 0 for all j
+    cout << dp[N][M] << nl;
+}
 
+
+
+
+
+
+//maximum product
+void solve()
+{
+    ll a, b;
+    cin >> a >> b;
+    string s = to_string(b);
+    int len = s.length();
+    ll max_prod = 0;
+    ll ans = b;
+    auto calc_prod = [](string t) -> ll {
+        ll p = 1;
+        for (char c : t) {
+            p *= (c - '0');
+        }
+        return p;
+    };
+    auto has_zero = [](ll n) -> bool {
+        string str = to_string(n);
+        for (char c : str) {
+            if (c == '0') return true;
+        }
+        return false;
+    };
+    if (!has_zero(b)) {
+        max_prod = calc_prod(s);
+        ans = b;
+    }
+    // Special case for leading 1
+    if (len > 1 && s[0] == '1') {
+        string t(len - 1, '9');
+        ll num = stoll(t);
+        if (num >= a) {
+            ll prod = calc_prod(t);
+            if (prod > max_prod) {
+                max_prod = prod;
+                ans = num;
+            }
+        }
+    }
+    // General cases
+    for (int i = 0; i < len; i++) {
+        if (s[i] > '1') {
+            string t = s;
+            t[i]--;
+            for (int j = i + 1; j < len; j++) {
+                t[j] = '9';
+            }
+            ll num = stoll(t);
+            if (num >= a && num <= b) {
+                ll prod = calc_prod(t);
+                if (prod > max_prod) {
+                    max_prod = prod;
+                    ans = num;
+                }
+            }
+        }
+    }
+    cout << ans << nl;
+}
 
 
 
