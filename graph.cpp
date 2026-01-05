@@ -943,6 +943,111 @@ int main() {
 
 
 //online:
+
+
+//jjzzhu and cities - cf(add new path and if used);
+ 
+//================ Code starts here ================
+void solve()
+{
+    int n, m, k;
+    cin >> n >> m >> k;
+    vector<vpi> adj(n + 1);
+    vector<array<int,3>> roads;
+    rep(i, 0, m)
+    {
+        int u, v, w;
+        cin >> u >> v >> w;
+        adj[u].pb({v, w});
+        adj[v].pb({u, w});
+        roads.pb({u, v, w});
+    }
+ 
+    vpi temp;
+    rep(i, 0, k)
+    {
+        int node, dis;
+        cin >> node >> dis;
+        temp.pb({dis, node});
+        // add train edges to graph before Dijkstra
+        adj[1].pb({node, dis});
+        adj[node].pb({1, dis});
+    }
+ 
+    vector<long long> dist(n + 1, LLONG_MAX);
+    dist[1] = 0;
+    set<pair<long long,int>> s;
+    s.insert({0, 1});
+    vi visited(n + 1, 0);
+    while (!s.empty())
+    {
+        auto yo = *s.begin();
+        s.erase(s.begin());
+        int u = yo.second;
+        if (visited[u]) continue;
+        visited[u] = 1;
+        long long d = yo.first;
+        for (auto &ele : adj[u])
+        {
+            int v = ele.first;
+            long long wt = ele.second;
+            if (!visited[v])
+            {
+                if (d + wt < dist[v])
+                {
+                    if (dist[v] != LLONG_MAX) s.erase({dist[v], v});
+                    dist[v] = d + wt;
+                    s.insert({dist[v], v});
+                }
+            }
+        }
+    }
+ 
+    // count how many road-edges give the shortest distance for each node
+    vi roadCount(n + 1, 0);
+    for (auto &e : roads)
+    {
+        int u = e[0], v = e[1], w = e[2];
+        if (dist[u] != LLONG_MAX && dist[u] + (long long)w == dist[v]) ++roadCount[v];
+        if (dist[v] != LLONG_MAX && dist[v] + (long long)w == dist[u]) ++roadCount[u];
+    }
+ 
+    // used[node] == true means NO road provides shortest path (so a train must be kept)
+    vector<bool> used(n + 1, false);
+    for (int i = 1; i <= n; ++i) used[i] = (roadCount[i] == 0);
+ 
+    int ans = 0;
+    vi num(n + 1, 0);
+    sort(all(temp));
+    rep(i, 0, (int)temp.size()){
+        int node = temp[i].second;
+        int dis = temp[i].first;
+        if (dist[node] == dis) num[node]++;
+    }
+    rep(i, 0, (int)temp.size()){
+        int node = temp[i].second;
+        int dis = temp[i].first;
+        if (dist[node] < dis){
+            ans++;
+        }
+        else if (dist[node] == dis && num[node] > 1 && used[node]){
+            ans++;
+            num[node]--;
+        }
+        else if (!used[node] && dist[node] == dis){
+            ans++;
+        }
+    }
+ 
+    cout << ans << nl;
+}
+
+
+
+
+
+
+
 //cf- dijkstra?
 // ================ Author: Rayyan Khalil ================
 
@@ -1273,6 +1378,82 @@ signed main()
     }
 }
 
+
+
+
+
+// a sec online 
+void solve()
+{
+  int k;
+  cin >>k;
+  int n,m;
+  cin >>n>>m;
+  vector<vvi>adj(n+1);
+  rep(i,0,m){
+    int u,v,c,w;
+    cin >>u>>v>>c>>w;
+    // w+=(c*k);
+    adj[u].pb({v,c,w});
+    adj[v].pb({u,c,w});
+  }
+  int src,d;
+  cin >>src>>d;
+  vi dist(n+1,LLONG_MAX);
+  dist[src]=0;
+  vi par(n+1,-1);
+  par[src]=0;
+  vi time(n+1,LLONG_MAX);
+  time[src]=0;
+  set<pi>s;
+  vi visited(n+1,0);
+  s.insert({0,src});
+  while(!s.empty()){
+    pi vn = *s.begin();
+    s.erase(s.begin());
+    visited[vn.second]=1;
+    for(auto &child: adj[vn.second]){
+        int node =child[0];
+        int c= child[1];
+        int wt = child[2];
+        int tot = wt+(c*k);
+        if(vn.second!=src){
+            tot+=k;
+            c+=1;
+        }
+        if(dist[vn.second]+tot<dist[node]){
+            dist[node] = dist[vn.second]+tot;
+            time[node] = time[vn.second]+c;
+            par[node] = vn.second;
+            s.insert({dist[node],node});
+        }
+
+    }
+    
+  }
+  if(dist[d]==LLONG_MAX){
+    cout<<"Error"<<nl;
+    return;
+  }
+  vi path;
+  int nown = d;
+  while(nown!=0){
+    path.pb(nown);
+    nown = par[nown];
+  }
+  reverse(all(path));
+  rep(i,0,(int)path.size()){
+    cout<<path[i];
+    if(i==(int)path.size()-1){
+        cout<<' ';
+    }
+    else{
+        cout<<"->";
+    }
+  }
+  cout<<time[d]<<" "<<dist[d]<<nl;
+  
+}
 
 
 
