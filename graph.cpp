@@ -1458,4 +1458,96 @@ void solve()
 
 
 
+// b online
+void solve()
+{
+    int n, m, k, b, e;
+    cin >> n >> m >> k >> b >> e;
+    vi cap(n + 1, 0);
+    vi bloc(n + 1, 0);
+    vi emer(n + 1, 0);
+    vi order;
+    rep(i, 0, k)
+    {
+        int node;
+        cin >> node;
+        cap[node] = 1;
+    }
+    rep(i, 0, b)
+    {
+        int node;
+        cin >> node;
+
+        bloc[node] = 1;
+    }
+    rep(i, 0, e)
+    {
+        int node;
+        cin >> node;
+        order.pb(node);
+        emer[node] = 1;
+    }
+    vector<vpi> adj(n + 1);
+    rep(i, 0, m)
+    {
+        int u, v, w;
+        cin >> u >> v >> w;
+        if (bloc[u] || bloc[v])
+        {
+            continue;
+        }
+        adj[u].pb({v, w});
+        // adj[v].pb({u, w});
+    }
+    vi dist(n + 1, LLONG_MAX);
+    rep(i, 1, n + 1)
+    {
+        if (cap[i])
+        {
+            dist[i] = 0;
+        }
+    }
+    rep(i, 0, n - 1)
+    {
+        rep(u, 1, n + 1)
+        {
+            for (auto &child : adj[u])
+            {
+                int vn = child.first;
+                int wt = child.second;
+                if (dist[u] != LLONG_MAX && dist[u] + wt < dist[vn])
+                {
+                    dist[vn] = dist[u] + wt;
+                }
+            }
+        }
+    }
+    rep(u, 1, n + 1)
+    {
+        for (auto &child : adj[u])
+        {
+            int vn = child.first;
+            int wt = child.second;
+            if (dist[u] != LLONG_MAX && dist[u] + wt < dist[vn])
+            {
+                cout<<"Abyss Detected"<<nl;
+                return;
+            }
+        }
+    }
+    rep(i,0,e){
+        if(dist[order[i]]==LLONG_MAX){
+            cout<<"INF"<<nl;
+            continue;
+        }
+        cout<<dist[order[i]]<<nl;
+    }
+    return;
+    
+}
+
+
+
+
+
 
