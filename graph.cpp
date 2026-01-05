@@ -1548,6 +1548,84 @@ void solve()
 
 
 
+//c online: 
+void solve()
+{
+    int n, m, f;
+    cin >> n >> m >> f;
+    vi cost(n + 1);
+    rep(i, 1, n + 1)
+    {
+        cin >> cost[i];
+    }
+    // int k;
+    // cin >> k;
+    vector<vpi> adj(n + 1);
+    rep(i, 0, m)
+    {
+        int u, v, w;
+        cin >> u >> v >> w;
+        int cst =  w;
+        adj[u].pb({v, cst});
+        cst =  w;
+        adj[v].pb({u, cst});
+    }
+    int k;
+    cin >>k;
+    vpi dist(n + 1);
+    rep(i,1,n+1){
+        dist[i]={LLONG_MAX,i};
+    }
+    set<pi> s;
+    vi visited(n + 1, f);
+    dist[1] = {0,1};
+    s.insert({0, 1});
+    // debug(adj);
+    while (!s.empty())
+    {
+        pi vn = *s.begin();
+        s.erase(s.begin());
+        for (auto &ele : adj[vn.second])
+        {
+            int wt = ele.second;
+            if (dist[ele.first].first > dist[vn.second].first + wt)
+            {
+                dist[ele.first] = {dist[vn.second].first + wt, ele.first};
+                s.insert({dist[ele.first].first, ele.first});
+            }
+        }
+    }
+    sort(all(dist));
+    // debug(dist);
+    // sort(all(dist));
+    int ct = 0;
+    int i = 1;
+    while (ct < k && i <= n)
+    {
+        if (dist[i].first == LLONG_MAX)
+        {
+            cout << -1 << " ";
+            ct++;
+            continue;
+        }
+        if (cost[dist[i].second] == 0)
+        {
+            i++;
+            continue;
+        }
+        else
+        {
+            cout << f+dist[i].first << " ";
+            ct++;
+            cost[dist[i].second]--;
+        }
+    }
+    while(ct<k){
+        cout<<-1<<" ";
+        ct++;
+    }
 
+    cout<<nl;
+}
 
 
