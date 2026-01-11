@@ -1381,78 +1381,111 @@ signed main()
 
 
 
-
-// a sec online 
+//a sec online
 void solve()
 {
-  int k;
-  cin >>k;
-  int n,m;
-  cin >>n>>m;
-  vector<vvi>adj(n+1);
-  rep(i,0,m){
-    int u,v,c,w;
-    cin >>u>>v>>c>>w;
-    // w+=(c*k);
-    adj[u].pb({v,c,w});
-    adj[v].pb({u,c,w});
-  }
-  int src,d;
-  cin >>src>>d;
-  vi dist(n+1,LLONG_MAX);
-  dist[src]=0;
-  vi par(n+1,-1);
-  par[src]=0;
-  vi time(n+1,LLONG_MAX);
-  time[src]=0;
-  set<pi>s;
-  vi visited(n+1,0);
-  s.insert({0,src});
-  while(!s.empty()){
-    pi vn = *s.begin();
-    s.erase(s.begin());
-    visited[vn.second]=1;
-    for(auto &child: adj[vn.second]){
-        int node =child[0];
-        int c= child[1];
-        int wt = child[2];
-        int tot = wt+(c*k);
-        if(vn.second!=src){
-            tot+=k;
-            c+=1;
+    int n, m, k, x;
+    cin >> n >> m >> k >> x;
+    vi a(k + 1);
+    vi h(k + 1);
+    rep(i, 1, k + 1)
+    {
+        cin >> a[i];
+    }
+    rep(i, 1, k + 1)
+    {
+        cin >> h[i];
+    }
+    vector<vector<pi>> dist(n + 1, vpi(n + 1));
+    int INF = LLONG_MAX;
+    rep(i, 1, n + 1)
+    {
+        rep(j, 1, n + 1)
+        {
+            dist[i][j] = {INF, -1};
         }
-        if(dist[vn.second]+tot<dist[node]){
-            dist[node] = dist[vn.second]+tot;
-            time[node] = time[vn.second]+c;
-            par[node] = vn.second;
-            s.insert({dist[node],node});
-        }
+    }
+    rep(i, 1, n + 1)
+    {
+        dist[i][i].first = 0;
+    }
+    rep(i, 0, m)
+    {
+        int u, v, w;
+        cin >> u >> v >> w;
+        dist[u][v] = {w, u};
+        
+        dist[v][u] = {w, v};
+    }
 
+    rep(kk, 1, n + 1)
+    {
+        rep(i, 1, n + 1)
+        {
+            rep(j, 1, n + 1)
+            {
+                int dd = dist[i][kk].first;
+                int dd2 = dist[kk][j].first;
+                if (dd != INF && dd2 != INF)
+                {
+                    if (dist[i][j].first > dd + dd2)
+                    {
+                        dist[i][j].second = kk;
+                        dist[i][j].first = dd + dd2;
+                    }
+                }
+            }
+        }
     }
-    
-  }
-  if(dist[d]==LLONG_MAX){
-    cout<<"Error"<<nl;
+   
+    int mincost = INF;
+    int tar = -1;
+    int minlast = INF;
+    rep(i,1,n+1){
+        int s =0;
+        bool flag = false;
+        int mx = -1;
+        rep(j,1,k+1){
+            int st = a[j];
+            if(dist[st][i].first>x){
+                flag = true;
+                break;
+            }
+            s+=dist[st][i].first*h[j];
+            mx = max<ll>(mx,dist[st][i].first);
+            
+        }
+        if(flag)continue;
+        if(s<mincost){
+            mincost=s;
+            tar=i;
+            minlast =mx;
+        }
+    }
+    if(tar==-1){
+        cout<<"No meeting"<<nl;
+        return;
+    }
+    cout<<tar<<" "<<mincost<<" "<<minlast<<nl;
+    rep(i,1,k+1){
+        if(a[i]==tar){
+            cout<<a[i]<<" "<<0<<nl;
+            continue;
+        }
+        vi path;
+        int now = tar;
+        while(true){
+            path.pb(now);
+            if(now==a[i])break;
+            now = dist[a[i]][now].second;
+        }
+        reverse(all(path));
+        rep(i,0,(int)path.size()-1){
+            cout<<path[i]<<" -> ";
+        }
+        cout<<path[(int)path.size()-1]<<" "<<h[i]*dist[a[i]][tar].first<<nl;
+    }
     return;
-  }
-  vi path;
-  int nown = d;
-  while(nown!=0){
-    path.pb(nown);
-    nown = par[nown];
-  }
-  reverse(all(path));
-  rep(i,0,(int)path.size()){
-    cout<<path[i];
-    if(i==(int)path.size()-1){
-        cout<<' ';
-    }
-    else{
-        cout<<"->";
-    }
-  }
-  cout<<time[d]<<" "<<dist[d]<<nl;
-  
 }
 
 
