@@ -1461,89 +1461,66 @@ void solve()
 // b online
 void solve()
 {
-    int n, m, k, b, e;
-    cin >> n >> m >> k >> b >> e;
-    vi cap(n + 1, 0);
-    vi bloc(n + 1, 0);
-    vi emer(n + 1, 0);
-    vi order;
-    rep(i, 0, k)
+    int n, m, k;
+    cin >> n >> m >> k;
+    vi st(n + 1);
+    vi tar(n + 1);
+    rep(i, 1, n + 1)
     {
-        int node;
-        cin >> node;
-        cap[node] = 1;
+        cin >> st[i];
     }
-    rep(i, 0, b)
+    rep(i, 1, n + 1)
     {
-        int node;
-        cin >> node;
-
-        bloc[node] = 1;
+        cin >> tar[i];
     }
-    rep(i, 0, e)
-    {
-        int node;
-        cin >> node;
-        order.pb(node);
-        emer[node] = 1;
-    }
-    vector<vpi> adj(n + 1);
+    int INF = LLONG_MAX;
+    vvi dist(n + 1, vi(n + 1, INF));
     rep(i, 0, m)
     {
         int u, v, w;
         cin >> u >> v >> w;
-        if (bloc[u] || bloc[v])
-        {
-            continue;
-        }
-        adj[u].pb({v, w});
-        // adj[v].pb({u, w});
+        dist[u][v] = w;
     }
-    vi dist(n + 1, LLONG_MAX);
     rep(i, 1, n + 1)
     {
-        if (cap[i])
-        {
-            dist[i] = 0;
-        }
+        dist[i][i] = 0;
     }
-    rep(i, 0, n - 1)
-    {
-        rep(u, 1, n + 1)
-        {
-            for (auto &child : adj[u])
-            {
-                int vn = child.first;
-                int wt = child.second;
-                if (dist[u] != LLONG_MAX && dist[u] + wt < dist[vn])
-                {
-                    dist[vn] = dist[u] + wt;
+    rep(k,1,n+1){
+        rep(i,1,n+1){
+            rep(j,1,n+1){
+                int dd = dist[i][k];
+                int dd2 = dist[k][j];
+                if(dd!=INF && dd2!=INF){
+                    dist[i][j]=min<ll>(dist[i][j],dd+dd2);
                 }
             }
         }
     }
-    rep(u, 1, n + 1)
-    {
-        for (auto &child : adj[u])
-        {
-            int vn = child.first;
-            int wt = child.second;
-            if (dist[u] != LLONG_MAX && dist[u] + wt < dist[vn])
-            {
-                cout<<"Abyss Detected"<<nl;
-                return;
-            }
+    vi ans;
+    rep(i,1,n+1){
+        if(dist[st[i]][tar[i]]!=INF){
+            ans.pb(dist[st[i]][tar[i]]);
         }
     }
-    rep(i,0,e){
-        if(dist[order[i]]==LLONG_MAX){
-            cout<<"INF"<<nl;
-            continue;
-        }
-        cout<<dist[order[i]]<<nl;
-    }
-    return;
     
+    sort(all(ans),greater<int>());
+    int sz = (int)ans.size();
+    int sum =0;
+    int i=0;
+    int now =0;
+    int ct = 0;
+    // debug(dist[4][3],st[1],tar[1]);
+    while(i<sz){
+        int mul = (1<<now);
+        sum+=ans[i]*mul;
+        ct++;
+        if(ct==k){
+            ct=0;
+            now++;
+        }
+        i++;
+    }
+    cout<<sum<<nl;
 }
 
 
