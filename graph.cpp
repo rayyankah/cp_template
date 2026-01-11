@@ -1551,81 +1551,103 @@ void solve()
 //c online: 
 void solve()
 {
-    int n, m, f;
-    cin >> n >> m >> f;
+    int n, m, k;
+    cin >> n >> m >> k;
     vi cost(n + 1);
+    vi discon(n + 1, 0);
     rep(i, 1, n + 1)
     {
         cin >> cost[i];
     }
-    // int k;
+    vvi dist(n + 1, vi(n + 1, LLONG_MAX));
+    rep(i, 1, n + 1)
+    {
+        dist[i][i] = 0;
+    }
     // cin >> k;
     vector<vpi> adj(n + 1);
     rep(i, 0, m)
     {
         int u, v, w;
         cin >> u >> v >> w;
-        int cst =  w;
-        adj[u].pb({v, cst});
-        cst =  w;
-        adj[v].pb({u, cst});
-    }
-    int k;
-    cin >>k;
-    vpi dist(n + 1);
-    rep(i,1,n+1){
-        dist[i]={LLONG_MAX,i};
-    }
-    set<pi> s;
-    vi visited(n + 1, f);
-    dist[1] = {0,1};
-    s.insert({0, 1});
-    // debug(adj);
-    while (!s.empty())
-    {
-        pi vn = *s.begin();
-        s.erase(s.begin());
-        for (auto &ele : adj[vn.second])
+        if (cost[u] == -1 || cost[v] == -1)
         {
-            int wt = ele.second;
-            if (dist[ele.first].first > dist[vn.second].first + wt)
+            continue;
+        }
+        int cst = w;
+        adj[u].pb({v, cst});
+        dist[u][v] = min<ll>(dist[u][v], cst);
+        cst = w;
+        adj[v].pb({u, cst});
+        dist[v][u] = min<ll>(dist[v][u], cst);
+    }
+    // int k;
+    // cin >>k;
+
+    rep(k, 1, n + 1)
+    {
+        rep(i, 1, n + 1)
+        {
+            rep(j, 1, n + 1)
             {
-                dist[ele.first] = {dist[vn.second].first + wt, ele.first};
-                s.insert({dist[ele.first].first, ele.first});
+                if (dist[i][k] != LLONG_MAX && dist[k][j] != LLONG_MAX)
+                {
+                    dist[i][j] = min<ll>(dist[i][j], dist[i][k] + dist[k][j]);
+                }
             }
         }
     }
-    sort(all(dist));
-    // debug(dist);
-    // sort(all(dist));
-    int ct = 0;
-    int i = 1;
-    while (ct < k && i <= n)
+    vector<vector<pi>> findist(n + 1, vpi(n + 1));
+    rep(i, 1, n + 1)
     {
-        if (dist[i].first == LLONG_MAX)
+        rep(j, 1, n + 1)
+        {
+            findist[i][j] = {dist[i][j], j};
+        }
+    }
+    rep(i, 1, n + 1)
+    {
+        sort(findist[i].begin() + 1, findist[i].end());
+    }
+    // debug(findist);
+    int q;
+    cin >> q;
+    while (q--)
+    {
+        int start;
+        cin >> start;
+        // debug(findist[start]);
+        int ct = 0;
+        int i = 1;
+        vi tempcost = cost;
+        while (ct < k && i <= n)
+        {
+            if (findist[start][i].first == LLONG_MAX)
+            {
+                cout << -1 << " ";
+                ct++;
+                continue;
+            }
+            if (tempcost[findist[start][i].second] == 0)
+            {
+                i++;
+                continue;
+            }
+            else
+            {
+                cout << findist[start][i].first << " ";
+                ct++;
+                tempcost[findist[start][i].second]--;
+            }
+        }
+        while (ct < k)
         {
             cout << -1 << " ";
             ct++;
-            continue;
         }
-        if (cost[dist[i].second] == 0)
-        {
-            i++;
-            continue;
-        }
-        else
-        {
-            cout << f+dist[i].first << " ";
-            ct++;
-            cost[dist[i].second]--;
-        }
+        cout<<nl;
     }
-    while(ct<k){
-        cout<<-1<<" ";
-        ct++;
-    }
-
-    cout<<nl;
+    return;
 }
 
 //normal dijkstra
