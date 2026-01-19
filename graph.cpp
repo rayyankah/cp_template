@@ -1382,112 +1382,94 @@ signed main()
 
 
 //a sec online
+//================ Code starts here ================
 void solve()
 {
-    int n, m, k, x;
-    cin >> n >> m >> k >> x;
-    vi a(k + 1);
-    vi h(k + 1);
-    rep(i, 1, k + 1)
-    {
-        cin >> a[i];
-    }
-    rep(i, 1, k + 1)
-    {
-        cin >> h[i];
-    }
-    vector<vector<pi>> dist(n + 1, vpi(n + 1));
-    int INF = LLONG_MAX;
-    rep(i, 1, n + 1)
-    {
-        rep(j, 1, n + 1)
-        {
-            dist[i][j] = {INF, -1};
-        }
-    }
-    rep(i, 1, n + 1)
-    {
-        dist[i][i].first = 0;
-    }
+    int n, m;
+    cin >> n >> m;
+
+    vector<pair<double, pair<int,int>>> edges(m);
+    vector<ll> real_w(m);
+
     rep(i, 0, m)
     {
-        int u, v, w;
+        int u, v;
+        ll w;
         cin >> u >> v >> w;
-        dist[u][v] = {w, u};
-        
-        dist[v][u] = {w, v};
+        edges[i] = {log((double)w), {u, v}};
+        real_w[i] = w;
     }
 
-    rep(kk, 1, n + 1)
+    // ---------- First MST (minimum product) ----------
+    rep(i, 0, n) make(i);
+
+    vector<int> mst_idx;
+    double best_log = 0;
+
+    vector<int> ord(m);
+    iota(all(ord), 0);
+    sort(all(ord), [&](int a, int b) {
+        return edges[a].first < edges[b].first;
+    });
+
+    for (int id : ord)
     {
-        rep(i, 1, n + 1)
+        int u = edges[id].second.first;
+        int v = edges[id].second.second;
+        if (find(u) != find(v))
         {
-            rep(j, 1, n + 1)
-            {
-                int dd = dist[i][kk].first;
-                int dd2 = dist[kk][j].first;
-                if (dd != INF && dd2 != INF)
-                {
-                    if (dist[i][j].first > dd + dd2)
-                    {
-                        dist[i][j].second = kk;
-                        dist[i][j].first = dd + dd2;
-                    }
-                }
-            }
+            Union(u, v);
+            mst_idx.pb(id);
+            best_log += edges[id].first;
         }
     }
-   
-    int mincost = INF;
-    int tar = -1;
-    int minlast = INF;
-    rep(i,1,n+1){
-        int s =0;
-        bool flag = false;
-        int mx = -1;
-        rep(j,1,k+1){
-            int st = a[j];
-            if(dist[st][i].first>x){
-                flag = true;
-                break;
-            }
-            s+=dist[st][i].first*h[j];
-            mx = max<ll>(mx,dist[st][i].first);
-            
-        }
-        if(flag)continue;
-        if(s<mincost){
-            mincost=s;
-            tar=i;
-            minlast =mx;
-        }
-    }
-    if(tar==-1){
-        cout<<"No meeting"<<nl;
+
+    if ((int)mst_idx.size() != n - 1)
+    {
+        cout << -1 << nl;
         return;
     }
-    cout<<tar<<" "<<mincost<<" "<<minlast<<nl;
-    rep(i,1,k+1){
-        if(a[i]==tar){
-            cout<<a[i]<<" "<<0<<nl;
-            continue;
-        }
-        vi path;
-        int now = tar;
-        while(true){
-            path.pb(now);
-            if(now==a[i])break;
-            now = dist[a[i]][now].second;
-        }
-        reverse(all(path));
-        rep(i,0,(int)path.size()-1){
-            cout<<path[i]<<" -> ";
-        }
-        cout<<path[(int)path.size()-1]<<" "<<h[i]*dist[a[i]][tar].first<<nl;
-    }
-    return;
-}
 
+    // ---------- Second MST ----------
+    double second_log = 1e100;
+
+    for (int banned : mst_idx)
+    {
+        rep(i, 0, n) make(i);
+        double cur_log = 0;
+        int cnt = 0;
+
+        for (int id : ord)
+        {
+            if (id == banned) continue;
+
+            int u = edges[id].second.first;
+            int v = edges[id].second.second;
+
+            if (find(u) != find(v))
+            {
+                Union(u, v);
+                cur_log += edges[id].first;
+                cnt++;
+            }
+        }
+
+        if (cnt == n - 1 && cur_log > best_log)
+        {
+            second_log = min(second_log, cur_log);
+        }
+    }
+
+    if (second_log > 9e99)
+    {
+        cout << -1 << nl;
+        return;
+    }
+
+    // Convert log back to product
+    ll result = llround(exp(second_log));
+    cout << result << nl;
+}
 
 
 
@@ -1559,105 +1541,178 @@ void solve()
 
 
 //c online: 
+struct edge
+{
+    int u;
+    int v;
+    int wt;
+    int idx;
+};
+
+//================ Code starts here ================
 void solve()
 {
-    int n, m, k;
-    cin >> n >> m >> k;
-    vi cost(n + 1);
-    vi discon(n + 1, 0);
-    rep(i, 1, n + 1)
+    int n, m, p;
+    cin >> n >> m >> p;
+    rep(i, 0, n)
     {
-        cin >> cost[i];
+        make(i);
     }
-    vvi dist(n + 1, vi(n + 1, LLONG_MAX));
-    rep(i, 1, n + 1)
+    int k;
+    cin >> k;
+    mii mp;
+    rep(i, 0, k)
     {
-        dist[i][i] = 0;
+        int idxx;
+        cin >> idxx;
+        mp[idxx] = 1;
     }
-    // cin >> k;
-    vector<vpi> adj(n + 1);
+    // debug(prob);
+    vector<edge> edges(m);
     rep(i, 0, m)
     {
-        int u, v, w;
-        cin >> u >> v >> w;
-        if (cost[u] == -1 || cost[v] == -1)
-        {
-            continue;
-        }
-        int cst = w;
-        adj[u].pb({v, cst});
-        dist[u][v] = min<ll>(dist[u][v], cst);
-        cst = w;
-        adj[v].pb({u, cst});
-        dist[v][u] = min<ll>(dist[v][u], cst);
+        cin >> edges[i].u >> edges[i].v >> edges[i].wt;
+        edges[i].idx = i;
     }
-    // int k;
-    // cin >>k;
+    sort(all(edges), [&](edge a, edge b)
+         { return a.wt < b.wt; });
+    ll ans = 0;
+    vpi fin_edges;
+    rep(i, 0, m)
+    {
+        int uu = edges[i].u;
+        int vvv = edges[i].v;
+        ll wtt = edges[i].wt;
+        if (find(uu) != find(vvv) && (mp.find(uu) == mp.end()) && (mp.find(vvv) == mp.end()))
+        {
+            Union(uu, vvv);
+            fin_edges.pb({uu, vvv});
+            ans += wtt;
+            edges[i].wt = INT_MAX;
+        }
+    }
+    int con = 0;
 
-    rep(k, 1, n + 1)
+    rep(i, 0, n)
     {
-        rep(i, 1, n + 1)
+        if (mp.find(i) != mp.end())
+            continue;
+        if (par[i] == i)
+            con++;
+    }
+    if (con == 1)
+    {
+        int sz = (int)fin_edges.size();
+        cout << sz << nl;
+
+        // cout << "Total weight " << ans << nl;
+        rep(i, 0, (int)fin_edges.size())
         {
-            rep(j, 1, n + 1)
-            {
-                if (dist[i][k] != LLONG_MAX && dist[k][j] != LLONG_MAX)
-                {
-                    dist[i][j] = min<ll>(dist[i][j], dist[i][k] + dist[k][j]);
-                }
-            }
+            cout << fin_edges[i].first << " " << fin_edges[i].second << nl;
+        }
+        cout << ans << nl;
+        return;
+    }
+    rep(i, 0, m)
+    {
+        bool flag1 = false;
+        bool flag2 = false;
+        int uu = edges[i].u;
+        int vvv = edges[i].v;
+        int wtt = edges[i].wt;
+        int idxx = edges[i].idx;
+        if (mp.find(uu) != mp.end())
+            flag1 = true;
+        if (mp.find(vvv) != mp.end())
+            flag2 = true;
+        if (!flag1 && !flag2)
+            continue;
+        if (flag1 && flag2)
+        {
+            edges[i].wt = wtt + 2 * p;
+        }
+        else
+        {
+            edges[i].wt = wtt + p;
         }
     }
-    vector<vector<pi>> findist(n + 1, vpi(n + 1));
-    rep(i, 1, n + 1)
+    sort(all(edges), [&](edge a, edge b)
+         { return a.wt < b.wt; });
+
+    // Track which components contain safe nodes
+    vi compHasSafe(n, 0);
+    rep(i, 0, n)
     {
-        rep(j, 1, n + 1)
+        if (find(i) == i && mp.find(i) == mp.end())
         {
-            findist[i][j] = {dist[i][j], j};
+            compHasSafe[i] = 1;
         }
     }
-    rep(i, 1, n + 1)
+
+    rep(i, 0, m)
     {
-        sort(findist[i].begin() + 1, findist[i].end());
+        int uu = edges[i].u;
+        int vvv = edges[i].v;
+
+        int rootU = find(uu);
+        int rootV = find(vvv);
+
+        if (rootU == rootV)
+            continue;
+
+        bool flag1 = (mp.find(uu) != mp.end());
+        bool flag2 = (mp.find(vvv) != mp.end());
+
+        // Skip safe-safe edges (already processed in pass 1 or redundant)
+        if (!flag1 && !flag2)
+            continue;
+
+        // If this edge merges two components that BOTH contain safe nodes,
+        // we reduce the number of disconnected safe components.
+        if (compHasSafe[rootU] && compHasSafe[rootV])
+            con--;
+
+        Union(uu, vvv);
+        ans += edges[i].wt;
+        fin_edges.pb({uu, vvv});
+
+        // Update safe status for the new root
+        int newRoot = find(uu);
+        compHasSafe[newRoot] = compHasSafe[rootU] | compHasSafe[rootV];
+
+        // If all safe nodes are connected, stop immediately to minimize cost
+        if (con == 1)
+            break;
     }
-    // debug(findist);
-    int q;
-    cin >> q;
-    while (q--)
+
+    if (con > 1)
     {
-        int start;
-        cin >> start;
-        // debug(findist[start]);
-        int ct = 0;
-        int i = 1;
-        vi tempcost = cost;
-        while (ct < k && i <= n)
-        {
-            if (findist[start][i].first == LLONG_MAX)
-            {
-                cout << -1 << " ";
-                ct++;
-                continue;
-            }
-            if (tempcost[findist[start][i].second] == 0)
-            {
-                i++;
-                continue;
-            }
-            else
-            {
-                cout << findist[start][i].first << " ";
-                ct++;
-                tempcost[findist[start][i].second]--;
-            }
-        }
-        while (ct < k)
-        {
-            cout << -1 << " ";
-            ct++;
-        }
-        cout<<nl;
+        cout << -1 << nl;
+        return;
     }
-    return;
+    int sz = (int)fin_edges.size();
+    cout << sz << nl;
+
+    // cout << "Total weight " << ans << nl;
+    rep(i, 0, (int)fin_edges.size())
+    {
+        cout << fin_edges[i].first << " " << fin_edges[i].second << nl;
+    }
+    cout << ans << nl;
+}
+
+signed main()
+{
+    fast;
+    // #ifndef ONLINE_JUDGE
+    //     freopen("input/test10.txt", "r", stdin);
+    // // freopen("output.txt", "w", stdout);
+    // #endif
+
+    int t = 1;
+    // cin >> t;
+    while (t--)
+        solve();
 }
 
 
