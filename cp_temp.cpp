@@ -44,6 +44,8 @@ const int MOD = 1000000007;
 #define nl '\n'
 #define precise(x) fixed << setprecision(x)
 #define int ll
+mt19937_64 rnd(chrono::steady_clock::now().time_since_epoch().count());
+//rnd()  generates a random number
 int binMul(int a, int b, int m)
 {
     int res = 0;
@@ -88,16 +90,6 @@ int extended_euclidean_gcd(int a, int b, int &x, int &y)
     y = x1 - y1 * (a / b);
     return d;
 }
-int inverse_mod(int a, int m){
-    int x,y;
-    int g = extended_euclidean_gcd(a,m,x,y);
-    if(g!=1)return -1;
-    else{
-        x = (x%m+m)%m;
-        return x;
-    }
-}
-
 
 template <class T>
 using vv = vector<vector<T>>;
@@ -270,6 +262,9 @@ int ncr(int n, int r)
  
     return (binMul(factorial[n], binMul(inv[r], inv[n - r], MOD), MOD));
 }
+//random number within a range [l,r]
+int rndRange(int l, int r) { return rnd() % (r - l + 1) + l; }
+
 
 //================ Code starts here ================
 void solve()
