@@ -277,6 +277,28 @@ void solve()
 
 
 //cses distinct routes
+vvi g_adj;
+vvi g_flow_mat;
+ 
+bool dfs(int u, int t, vi &path)
+{
+    if (u == t)
+        return true;
+    for (int v : g_adj[u])
+    {
+        if (g_flow_mat[u][v] > 0)
+        {
+            g_flow_mat[u][v]--;
+            path.pb(v);
+            if (dfs(v, t, path))
+                return true;
+            path.pop_back();
+            g_flow_mat[u][v]++;
+        }
+    }
+    return false;
+}
+
 void solve()
 {
     int n, m;
