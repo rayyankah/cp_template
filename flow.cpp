@@ -292,7 +292,7 @@ void solve()
         adj[u].pb(v);
         adj[v].pb(u);
  
-        capacity[u][v] += w; // multiple edge
+        capacity[u][v] += w;
         original[u][v] += w;
     }
     int flow = 0;
@@ -353,30 +353,14 @@ void solve()
     }
  
     vvi paths;
-    auto dfs = [&](auto &&self, int u, int t, vi &path) -> bool
-    {
-        if (u == t)
-            return true;
-        for (auto v : adj[u])
-        {
-            if (flow_mat[u][v] > 0)
-            {
-                flow_mat[u][v]--;
-                path.pb(v);
-                if (self(self, v, t, path))
-                    return true;
-                path.pop_back();
-                flow_mat[u][v]++;
-            }
-        }
-        return false;
-    };
+    g_adj = adj;
+    g_flow_mat = flow_mat;
  
     rep(i, 0, flow)
     {
         vi path;
         path.pb(1);
-        if (!dfs(dfs, 1, n, path))
+        if (!dfs(1, n, path))
             break;
         paths.pb(path);
     }
@@ -393,7 +377,6 @@ void solve()
     }
     return;
 }
-
 
 
 //b sec online
