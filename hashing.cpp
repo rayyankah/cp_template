@@ -616,4 +616,560 @@ signed main()
 }
 
 
+// a sec online
+// ================ Author: Rayyan Khalil ================
+
+#include <bits/stdc++.h>
+using namespace std;
+
+#define vvi vector<vector<int>>
+#define vll vector<long long>
+#define mi map<int, int>
+#define si set<int>
+#define mii map<int, int>
+#define vi vector<int>
+#define vpi vector<pair<int, int>>
+#define pi pair<int, int>
+#define ll long long
+#define pb push_back
+#define all(x) (x).begin(), (x).end()
+#define rep(i, a, b) for (int i = a; i < b; i++)
+#define repb(i, a, b) for (int i = a; i >= b; i--)
+#define fast                          \
+    ios_base::sync_with_stdio(false); \
+    cin.tie(nullptr);                 \
+    cout.tie(nullptr)
+#define vv vector
+#define myCeil(a, b) (a + b - 1) / b
+#define nl '\n'
+
+template <typename T>
+ostream &operator<<(ostream &os, const vector<T> &v)
+{
+    os << "[";
+    for (size_t i = 0; i < v.size(); ++i)
+    {
+        if (i)
+            os << ", ";
+        os << v[i];
+    }
+    os << "]";
+    return os;
+}
+#ifdef DEBUG
+#define debug(x) cerr << "[" << #x << "]: " << x << "\n"
+#else
+#define debug(x)
+#endif
+
+template <class T>
+void read(vector<T> &a)
+{
+    for (auto &x : a)
+        cin >> x;
+}
+
+const int N = 1e6 + 10;
+int isPrime[N];
+void sieve()
+{
+    for (int i = 2; i < N; i++)
+    {
+        isPrime[i] = 1;
+    }
+    for (int i = 2; i * i < N; i++)
+    {
+        if (isPrime[i])
+        {
+            for (int j = i * i; j < N; j += i)
+            {
+                isPrime[j] = 0;
+            }
+        }
+    }
+}
+
+int nextPrime(int n)
+{
+    if (n <= 1)
+        return 2;
+    int ans = n + 1;
+    while (ans < N && !isPrime[ans])
+    {
+        ans++;
+    }
+    return ans;
+}
+int prevPrime(int n)
+{
+    if (n <= 2)
+        return 2;
+    int ans = n - 1;
+    while (ans > 1 && !isPrime[ans])
+    {
+        ans--;
+    }
+    return ans;
+}
+
+ll hash1(const string &s)
+{
+    ll h = 0;
+    int len = min((int)s.size(), 3);
+    rep(i, 0, len)
+    {
+        char ch = tolower(s[i]);
+        int val = (ch == ' ') ? 0 : (ch - 'a' + 1);
+        h = h * 27 + val;
+    }
+    return h;
+}
+
+ll hash2(const string &s)
+{
+    ll h = 0;
+    for (char ch : s)
+    {
+        int val = (tolower(ch) - 'a' + 1);
+        h = 37 * h + val;
+    }
+    return h;
+}
+int hash3(int n)
+{
+    return n;
+}
+string generateRandomWord(int length)
+{
+    static random_device rd;
+    static mt19937 gen(rd());
+    static uniform_int_distribution<int> dis('a', 'z');
+    string word;
+    for (int i = 0; i < length; ++i)
+    {
+        word += dis(gen);
+    }
+    return word;
+}
+
+template <typename K, typename V>
+struct Entry
+{
+    K key;
+    V value;
+};
+
+template <typename K, typename V>
+class ChainingHashTable
+{
+private:
+    vector<list<Entry<K, V>>> table;
+    int currSize = 0;
+    int tableSize;
+    double maxLoad = 0.5;
+    double minLoad = 0.25;
+    int initSize = 13;
+    int lastResizeElems = 0;
+    int insertsSinceResz = 0;
+    int delsSinceResz = 0;
+    ll collisionCount = 0;
+    function<ll(const K &)> hashFunc;
+    int myHash(const K &key) const
+    {
+        ll h = hashFunc(key);
+        int idx = h % tableSize;
+        if (idx < 0)
+            idx += tableSize;
+        return idx;
+    }
+    void rehash(bool expand)
+    {
+        vector<list<Entry<K, V>>> old = table;
+        if (expand)
+        {
+            tableSize = nextPrime(tableSize * 2);
+        }
+        else
+        {
+            tableSize = prevPrime(tableSize / 2);
+            if (tableSize < initSize)
+            {
+                tableSize = initSize;
+            }
+        }
+        table.assign(tableSize, {});
+        currSize = 0;
+        insertsSinceResz = 0;
+        delsSinceResz = 0;
+        for (const auto &lst : old)
+        {
+            for (const auto &entry : lst)
+            {
+                insert(entry.key, entry.value);
+            }
+        }
+        lastResizeElems = currSize;
+    }
+
+public:
+    ChainingHashTable(function<ll(const K &)> hf)
+    {
+        hashFunc = hf;
+        tableSize = initSize;
+        table.assign(tableSize, {});
+    }
+    bool insert(const K &key, const V &value)
+    {
+        int idx = myHash(key);
+        auto &lst = table[idx];
+        for (const auto &entry : lst)
+        {
+            if (entry.key == key)
+            {
+                return false;
+            }
+        }
+        collisionCount += lst.size();
+        lst.pb({key, value});
+        currSize++;
+        insertsSinceResz++;
+        double load = 1.0 * currSize / tableSize;
+        if (load > maxLoad && insertsSinceResz >= lastResizeElems / 2)
+        {
+            rehash(true);
+        }
+        return true;
+    }
+    V search(const K &key, int &hits)
+    {
+        hits = 0;
+        int idx = myHash(key);
+        const auto &lst = table[idx];
+        for (const auto &entry : lst)
+        {
+            hits++;
+            if (entry.key == key)
+            {
+                return entry.value;
+            }
+        }
+        return V();
+    }
+    bool remove(const K &key)
+    {
+        int idx = myHash(key);
+        auto &lst = table[idx];
+        for (auto it = lst.begin(); it != lst.end(); it++)
+        {
+            if (it->key == key)
+            {
+                lst.erase(it);
+                currSize--;
+                delsSinceResz++;
+                double load = 1.0 * currSize / tableSize;
+                if (load < minLoad && tableSize > initSize && delsSinceResz >= lastResizeElems / 2)
+                {
+                    rehash(false);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+    ll getCollisionCount() const
+    {
+        return collisionCount;
+    }
+};
+
+template <typename K, typename V>
+class ParentHashTable
+{
+protected:
+    enum EntryType
+    {
+        OCCUPIED,
+        DELETED,
+        EMPTY
+    };
+    struct HashEntry
+    {
+        Entry<K, V> element;
+        EntryType info;
+        HashEntry()
+        {
+            info = EMPTY;
+        }
+        HashEntry(const K &key, const V &value, EntryType i = OCCUPIED)
+        {
+            element = {key, value};
+            info = i;
+        }
+    };
+    vector<HashEntry> table;
+    int currSize = 0;
+    int tableSize;
+    double maxLoad = 0.5;
+    double minLoad = 0.25;
+    int initSize = 13;
+    int lastResizeElems = 0;
+    int insertsSinceResz = 0;
+    int delsSinceResz = 0;
+    ll collisionCount = 0;
+    int pmax;
+    int maxprobeseq = 0;
+    function<ll(const K &)> hashFunc;
+    ll auxHash(const K &key) const
+    {
+        ll h = 0;
+        for (char ch : key)
+        {
+            int val = (tolower(ch) - 'a' + 1);
+            h = 31 * h + val;
+        }
+        return h ? h : 1;
+    }
+    int myHash(const K &key) const
+    {
+        ll h = hashFunc(key);
+        int idx = h % tableSize;
+        if (idx < 0)
+            idx += tableSize;
+        return idx;
+    }
+    virtual ll probeOffset(const K &key, int i) const = 0;
+    int findPos(const K &key, int &hits) const
+    {
+        hits = 0;
+        int i = 0;
+        int currPos = myHash(key);
+        while (table[currPos].info != EMPTY && table[currPos].element.key != key)
+        {
+            hits++;
+            i++;
+            currPos = (myHash(key) + probeOffset(key, i)) % tableSize;
+            if (currPos < 0)
+                currPos += tableSize;
+            if (i > tableSize)
+                return -1;
+        }
+        hits++;
+        if (table[currPos].info == EMPTY)
+            return -1;
+        return currPos;
+    }
+    void rehash(bool expand)
+    {
+        cout << "--- Rehash Triggered: BEFORE ---" << nl;
+        cout << "Table Size: " << tableSize << nl;
+        cout << "Active Processes: " << currSize << nl;
+        double lf = 1.0 * currSize / tableSize;
+        cout << "Load Factor: " << fixed << setprecision(3) << lf << nl;
+        cout << "Max Probe Sequence: " << maxprobeseq << nl;
+        vector<HashEntry> old = table;
+        if (expand)
+        {
+            tableSize = nextPrime(tableSize * 2);
+        }
+        else
+        {
+            tableSize = prevPrime(tableSize / 2);
+            if (tableSize < initSize)
+            {
+                tableSize = initSize;
+            }
+        }
+        table.resize(tableSize);
+        currSize = 0;
+        insertsSinceResz = 0;
+        delsSinceResz = 0;
+        maxprobeseq = 0;
+        for (auto &entry : table)
+        {
+            entry.info = EMPTY;
+        }
+        for (const auto &entry : old)
+        {
+            if (entry.info == OCCUPIED)
+            {
+                insert(entry.element.key, entry.element.value);
+            }
+        }
+        lastResizeElems = currSize;
+        cout << "--- Rehash Triggered: AFTER ---" << nl;
+        cout << "Table Size: " << tableSize << nl;
+        cout << "Active Processes: " << currSize << nl;
+        lf = 1.0 * currSize / tableSize;
+        cout << "Load Factor: " << fixed << setprecision(3) << lf << nl;
+        cout << "Max Probe Sequence: " << maxprobeseq << nl;
+    }
+
+public:
+    ParentHashTable(function<ll(const K &)> hf, int sz, int p_max)
+    {
+        hashFunc = hf;
+        initSize = sz;
+        tableSize = initSize;
+        table.resize(tableSize);
+        pmax = p_max;
+    }
+    V search(const K &key, int &hit) const
+    {
+        int idx = findPos(key, hit);
+        if (idx == -1)
+            return V();
+        return table[idx].element.value;
+    }
+    bool remove(const K &key, bool flag = true)
+    {
+        int hits;
+        int idx = findPos(key, hits);
+        if (idx == -1)
+            return false;
+        table[idx].info = DELETED;
+        currSize--;
+        delsSinceResz++;
+        if (flag)
+        {
+            cout << "FREE " << key << ": Freed from index " << idx << nl;
+        }
+        // cout<<maxprobeseq<<nl;
+        double load = 1.0 * currSize / tableSize;
+        if (tableSize > initSize && delsSinceResz >= 5 && load < 0.2)
+        {
+            rehash(false);
+        }
+        return true;
+    }
+    bool insert(const K &key, const V &value, bool flag = false)
+    {
+        int hits;
+        int pos = findPos(key, hits);
+        if (pos != -1)
+            return false;
+        int i = 0;
+        int currPos = myHash(key);
+        int firDel = -1;
+        int nowprobe = 1;
+        bool flagg = false;
+        while (table[currPos].info != EMPTY)
+        {
+            if (table[currPos].info == DELETED && firDel == -1)
+            {
+                firDel = currPos;
+                flagg = true;
+                break;
+            }
+            nowprobe++;
+            if (nowprobe > pmax)
+            {
+                maxprobeseq = pmax;
+                rehash(true);
+                currPos = myHash(key);
+                firDel = -1;
+                nowprobe = 1;
+                continue;
+            }
+            // maxprobeseq = max(maxprobeseq, nowprobe);
+            i++;
+            currPos = (myHash(key) + probeOffset(key, i)) % tableSize;
+            if (currPos < 0)
+                currPos += tableSize;
+            if (i > tableSize)
+                return false;
+        }
+
+        collisionCount += i;
+        pos = (firDel != -1) ? firDel : currPos;
+        table[pos] = HashEntry(key, value, OCCUPIED);
+        currSize++;
+        maxprobeseq = max(maxprobeseq, nowprobe);
+        if (flag)
+        {
+            cout << "ALLOCATE " << key << ": Inserted at index " << pos << " (probes: " << nowprobe << ")" << nl;
+        }
+        insertsSinceResz++;
+        double load = 1.0 * currSize / tableSize;
+
+        return true;
+    }
+    ll getCollisionCount() const
+    {
+        return collisionCount;
+    }
+};
+
+template <typename K, typename V>
+class OnlineHashing : public ParentHashTable<K, V>
+{
+protected:
+    ll probeOffset(const K &key, int i) const override
+    {
+        return i * i;
+    }
+
+public:
+    OnlineHashing(function<ll(const K &)> hf, int sz, int p_max) : ParentHashTable<K, V>(hf, sz, p_max)
+    {
+    }
+};
+
+void solve()
+{
+    // int n;
+    // cout << "Enter word length: " << nl;
+    // cin >> n;
+    // int c1, c2;
+    // cout << "Enter C1 and C2 for custom probing: " << nl;
+    // cin >> c1 >> c2;
+    // ChainingHashTable<string, int> ht(hash1);
+
+    // set<string> unique;
+    // int val = 1;
+    // while (unique.size() < 10)
+    // {
+    //     string word = generateRandomWord(n);
+    //     if (unique.insert(word).second)
+    //     {
+    //         ht.insert(word, val);
+    //         cout << "Inserted: " << word << " with value " << val << nl;
+    //         val++;
+    //     }
+    // }
+    // generateReport(c1, c2);
+
+    int n, pmax, q;
+    cin >> n >> pmax >> q;
+
+    OnlineHashing<int, int> h1(hash3, n, pmax);
+    while (q--)
+    {
+        string s;
+        int key;
+        cin >> s >> key;
+        if (s == "ALLOCATE")
+        {
+            h1.insert(key, q, true);
+        }
+        else
+        {
+            h1.remove(key, true);
+        }
+    }
+}
+
+signed main()
+{
+    fast;
+    sieve();
+    int t = 1;
+    // cin >> t;
+    while (t--)
+        solve();
+}
+
+
+
+
+
 
