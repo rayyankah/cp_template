@@ -1,5 +1,5 @@
 // ================ Author: Rayyan Khalil ================
-#define DEBUG   // <-- comment this ONE line to disable every debug(...)
+#define DEBUG
 
 #include <bits/stdc++.h>
 // #include <ext/pb_ds/assoc_container.hpp>
@@ -25,35 +25,25 @@ using namespace std;
 #define nl '\n'
 #define fast ios_base::sync_with_stdio(false); cin.tie(nullptr)
 
-const int MOD = 998244353; // or 1000000007
+const int MOD = 998244353;
 const int N = 1e6 + 10;
 mt19937_64 rnd(chrono::steady_clock::now().time_since_epoch().count());
-int rndRange(int l, int r) { return rnd() % (r - l + 1) + l; } // random in [l,r]
+int rndRange(int l, int r) { return rnd() % (r - l + 1) + l; }
 
 // ================ Debug ================
-// debug(x, v, st, mp, ...)  -> prints anything: ints, strings, pairs, vector, set, map, nested...
-// debugArr(a, n)            -> prints first n elements of a C array
 #ifdef DEBUG
+template <class... Ts> struct make_void_ { typedef void type; };
+template <class... Ts> using void_t_ = typename make_void_<Ts...>::type;
 template <class T, class = void> struct is_iterable : false_type {};
-template <class T> struct is_iterable<T, void_t<decltype(begin(declval<T &>())), decltype(end(declval<T &>()))>> : true_type {};
+template <class T> struct is_iterable<T, void_t_<decltype(begin(declval<T &>())), decltype(end(declval<T &>()))>> : true_type {};
 
+void _print(const string &s);
+void _print(const char *s);
 template <class A, class B> void _print(const pair<A, B> &p);
-template <class T> void _print(const T &x)
-{
-    if constexpr (is_iterable<T>::value && !is_same_v<T, string>)
-    {
-        cerr << "{";
-        bool first = true;
-        for (auto &&e : x)
-        {
-            if (!first) cerr << ", ";
-            first = false;
-            _print(e);
-        }
-        cerr << "}";
-    }
-    else cerr << x;
-}
+template <class T> void _print(const T &x);
+
+void _print(const string &s) { cerr << s; }
+void _print(const char *s) { cerr << s; }
 template <class A, class B> void _print(const pair<A, B> &p)
 {
     cerr << "(";
@@ -62,6 +52,21 @@ template <class A, class B> void _print(const pair<A, B> &p)
     _print(p.second);
     cerr << ")";
 }
+template <class T> void _print_impl(const T &x, true_type)
+{
+    cerr << "{";
+    bool first = true;
+    for (auto &&e : x)
+    {
+        if (!first) cerr << ", ";
+        first = false;
+        _print(e);
+    }
+    cerr << "}";
+}
+template <class T> void _print_impl(const T &x, false_type) { cerr << x; }
+template <class T> void _print(const T &x) { _print_impl(x, integral_constant<bool, is_iterable<T>::value>()); }
+
 void _dbg() { cerr << nl; }
 template <class H, class... T> void _dbg(const H &h, const T &...t)
 {
@@ -91,7 +96,6 @@ int binExp(int a, int b, int m = MOD)
     }
     return res;
 }
-// a*b % m in O(log b), safe for a, b, m up to 1e18
 int binMul(int a, int b, int m)
 {
     int res = 0;
@@ -115,7 +119,7 @@ int extgcd(int a, int b, int &x, int &y)
 }
 
 int fact[N], invFact[N];
-void compute_factorials() // call once in main if you need ncr
+void compute_factorials()
 {
     fact[0] = 1;
     rep(i, 1, N) fact[i] = fact[i - 1] * i % MOD;
@@ -133,7 +137,7 @@ struct Mint
 {
     int value;
     Mint(ll v = 0) { value = v % MOD; if (value < 0) value += MOD; }
-    Mint(ll a, ll b) : value(0) { *this += a; *this /= b; } // a/b mod MOD
+    Mint(ll a, ll b) : value(0) { *this += a; *this /= b; }
 
     Mint &operator+=(const Mint &b) { value += b.value; if (value >= MOD) value -= MOD; return *this; }
     Mint &operator-=(const Mint &b) { value -= b.value; if (value < 0) value += MOD; return *this; }
@@ -157,9 +161,9 @@ struct Mint
 // ================ Sieve ================
 int spf[N];
 bool isPrime[N];
-vector<vpi> distinct_primes(N); // distinct_primes[x] = {prime, count} of x
+vector<vpi> distinct_primes(N);
 vpi factorize(int x);
-void sieve() // call once in main
+void sieve()
 {
     rep(i, 2, N)
     {
@@ -173,7 +177,7 @@ void sieve() // call once in main
     }
     rep(i, 2, N) distinct_primes[i] = factorize(i);
 }
-vpi factorize(int x) // {prime, count}, O(log x), needs sieve()
+vpi factorize(int x)
 {
     vpi res;
     while (x > 1)
@@ -203,6 +207,7 @@ struct custom_hash
 };
 template <class K, class V> using umap = unordered_map<K, V, custom_hash>;
 template <class T> using uset = unordered_set<T, custom_hash>;
+
 
 //================ Code starts here ================
 void solve()
