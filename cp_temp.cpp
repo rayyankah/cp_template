@@ -189,6 +189,63 @@ vpi factorize(int x)
     return res;
 }
 
+vector<pair<long long, int>> factorizebig(long long n)
+{
+    vector<pair<long long, int>> factors;
+    // Check factor 2
+    if (n % 2 == 0)
+    {
+        int count = 0;
+        while (n % 2 == 0)
+        {
+            count++;
+            n /= 2;
+        }
+        factors.push_back({2, count});
+    }
+
+    if (n % 3 == 0)
+    {
+        int count = 0;
+        while (n % 3 == 0)
+        {
+            count++;
+            n /= 3;
+        }
+        factors.push_back({3, count});
+    }
+
+    for (long long i = 5; i * i <= n; i += 6)
+    {
+        if (n % i == 0)
+        {
+            int count = 0;
+            while (n % i == 0)
+            {
+                count++;
+                n /= i;
+            }
+            factors.push_back({i, count});
+        }
+        if (n % (i + 2) == 0)
+        {
+            int count = 0;
+            while (n % (i + 2) == 0)
+            {
+                count++;
+                n /= (i + 2);
+            }
+            factors.push_back({i + 2, count});
+        }
+    }
+
+    if (n > 1)
+    {
+        factors.push_back({n, 1});
+    }
+    return factors;
+}
+
 // ================ Anti-hack unordered_map ================
 struct custom_hash
 {
