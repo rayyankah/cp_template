@@ -25,7 +25,7 @@ using namespace std;
 #define nl '\n'
 #define fast ios_base::sync_with_stdio(false); cin.tie(nullptr)
 
-const int MOD = 998244353;
+const int MOD = 1e9 + 7; // 998244353
 const int N = 1e6 + 10;
 mt19937_64 rnd(chrono::steady_clock::now().time_since_epoch().count());
 int rndRange(int l, int r) { return rnd() % (r - l + 1) + l; }
@@ -81,7 +81,9 @@ template <class H, class... T> void _dbg(const H &h, const T &...t)
 #define debugArr(a, n)
 #endif
 
-template <class T> void read(vector<T> &a) { for (auto &x : a) cin >> x; }
+template <class T> void read(T &x) { cin >> x; }
+template <class A, class B> void read(pair<A, B> &p) { read(p.first), read(p.second); }
+template <class T> void read(vector<T> &a) { for (auto &x : a) read(x); }
 
 // ================ Math ================
 int binExp(int a, int b, int m = MOD)
@@ -118,9 +120,10 @@ int extgcd(int a, int b, int &x, int &y)
     return d;
 }
 
-int fact[N], invFact[N];
+vi fact, invFact;
 void compute_factorials()
 {
+    fact.resize(N), invFact.resize(N);
     fact[0] = 1;
     rep(i, 1, N) fact[i] = fact[i - 1] * i % MOD;
     invFact[N - 1] = binExp(fact[N - 1], MOD - 2);
@@ -159,12 +162,13 @@ struct Mint
 };
 
 // ================ Sieve ================
-int spf[N];
-bool isPrime[N];
-vector<vpi> distinct_primes(N);
+vi spf;
+vector<bool> isPrime;
+vector<vpi> distinct_primes;
 vpi factorize(int x);
 void sieve()
 {
+    spf.assign(N, 0), isPrime.assign(N, 0), distinct_primes.resize(N);
     rep(i, 2, N)
     {
         if (spf[i] == 0)
@@ -265,6 +269,13 @@ struct custom_hash
 template <class K, class V> using umap = unordered_map<K, V, custom_hash>;
 template <class T> using uset = unordered_set<T, custom_hash>;
 
+// heavy precomputation, only runs when called. need just one? call sieve() or compute_factorials() alone
+void preprocessing()
+{
+    sieve();
+    compute_factorials();
+}
+
 
 //================ Code starts here ================
 void solve()
@@ -275,8 +286,7 @@ void solve()
 signed main()
 {
     fast;
-    // sieve();
-    // compute_factorials();
+    // preprocessing();
     int t = 1;
     // cin >> t;
     while (t--)
