@@ -16,14 +16,15 @@ Most snippets assume the macros from `templates/base/cp_template.cpp` (`int` = `
 |---|---|
 | `base/` | `cp_template.cpp`, the main starter file (debug, binExp, factorials/nCr, Mint, sieve, anti-hack hash) |
 | `number_theory/` | Euler totient, Mobius (standalone full templates) |
-| `math/` | 2x2 linear equation solver |
-| `combinatorics/` | full combinatorics template, Catalan numbers |
-| `data_structures/` | DSU, offline DSU (reverse edge deletion), sparse table, trie |
-| `data_structures/segment_tree/` | generic lazy segment tree, max segment tree, point update, lazy range-add sum |
+| `math/` | 2x2 linear equation solver, NTT (polynomial multiply), FWHT (xor convolution) |
+| `combinatorics/` | full combinatorics template, Catalan numbers, de Bruijn sequence |
+| `data_structures/` | DSU, DSU with parity, offline DSU (reverse edge deletion), sparse table, trie, xor minimum spanning tree |
+| `data_structures/segment_tree/` | generic lazy segment tree, max segment tree, point update, lazy range-add sum, range-add max |
 | `data_structures/sqrt_decomposition/` | range min query, sqrt decomposition with lazy min update |
-| `graph/` | bridges, articulation points, biconnected components, SCC (Tarjan), Euler path (Hierholzer), bipartite coloring, Dijkstra, Floyd-Warshall |
+| `graph/` | bridges, articulation points, biconnected components, SCC (Tarjan), Euler path (Hierholzer), bipartite coloring, Dijkstra, Floyd-Warshall, Dinic max flow, Kuhn bipartite matching |
 | `trees/` | binary lifting / LCA, tree diameter, sum of all pair distances |
-| `strings/hashing/` | polynomial rolling hash, substring hash, double hash |
+| `strings/hashing/` | polynomial rolling hash, substring hash, double hash, double hash with lcp |
+| `geometry/` | integer convex hull + point in convex polygon, Minkowski sum |
 
 ## problems/
 
