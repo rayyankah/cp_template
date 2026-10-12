@@ -278,7 +278,7 @@ void preprocessing()
 
 
 //================ Code starts here ================
-void solve()
+void solve(int tc)
 {
 
 }
@@ -289,8 +289,5 @@ signed main()
     // preprocessing();
     int t = 1;
     // cin >> t;
-    while (t--)
-    {
-        solve();
-    }
+    rep(i, 1, t + 1) solve(i);
 }
