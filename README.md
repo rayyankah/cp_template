@@ -24,7 +24,7 @@ Most snippets assume the macros from `templates/base/cp_template.cpp` (`int` = `
 | `graph/` | bridges, articulation points, biconnected components, SCC (Tarjan), Euler path (Hierholzer), bipartite coloring, Dijkstra, Floyd-Warshall, Dinic max flow, Kuhn bipartite matching |
 | `trees/` | binary lifting / LCA, tree diameter, sum of all pair distances |
 | `strings/hashing/` | polynomial rolling hash, substring hash, double hash, double hash with lcp |
-| `geometry/` | integer convex hull + point in convex polygon, Minkowski sum |
+| `geometry/` | integer convex hull + point in convex polygon, Minkowski sum, 3d point / segment / triangle distances |
 
 ## problems/
 
