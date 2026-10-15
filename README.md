@@ -21,7 +21,7 @@ Most snippets assume the macros from `templates/base/cp_template.cpp` (`int` = `
 | `data_structures/` | DSU, DSU with parity, offline DSU (reverse edge deletion), sparse table, trie, xor minimum spanning tree |
 | `data_structures/segment_tree/` | generic lazy segment tree, max segment tree, point update, lazy range-add sum, range-add max |
 | `data_structures/sqrt_decomposition/` | range min query, sqrt decomposition with lazy min update |
-| `graph/` | finding one simple cycle (directed / undirected, multi-edges, self loops), bridges, articulation points, biconnected components, SCC (Tarjan), Euler path (Hierholzer), bipartite coloring, Dijkstra, Floyd-Warshall, Dinic max flow, Kuhn bipartite matching, Hungarian assignment, dominator tree |
+| `graph/` | finding one simple cycle (directed / undirected, multi-edges, self loops), bridges, articulation points, biconnected components, SCC (Tarjan), Euler path (Hierholzer), bipartite coloring, topological sort (Kahn), Dijkstra, Floyd-Warshall, Dinic max flow, Kuhn bipartite matching, Hungarian assignment, dominator tree |
 | `trees/` | binary lifting / LCA, tree diameter, sum of all pair distances |
 | `strings/` | generalized suffix automaton |
 | `strings/hashing/` | polynomial rolling hash, substring hash, double hash, double hash with lcp |
