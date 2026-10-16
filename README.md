@@ -5,7 +5,6 @@ Competitive programming templates and solved problems, organized by topic.
 ```
 templates/     reusable code: paste into templates/base/cp_template.cpp
 problems/      full solutions to specific problems, grouped by topic
-assignments/   university online/offline assignment solutions
 ```
 
 Most snippets assume the macros from `templates/base/cp_template.cpp` (`int` = `long long`, `vi`, `rep`, `pb`, `nl`, `MOD`, ...).
@@ -44,7 +43,3 @@ Most snippets assume the macros from `templates/base/cp_template.cpp` (`int` = `
 | `combinatorics/` | two arrays, trees counted by height, pankac |
 | `data_structures/` | Shichikuji and power grid (DSU/MST), Vasiliy's multiset (xor trie) |
 | `bit_manipulation/` | xor of a range (CF 2036F) |
-
-## assignments/
-
-Online/offline assignment solutions for `hashing/`, `flow/`, and `shortest_path/`.
