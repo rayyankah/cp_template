@@ -23,7 +23,7 @@ Most snippets assume the macros from `templates/base/cp_template.cpp` (`int` = `
 | `graph/` | finding one simple cycle (directed / undirected, multi-edges, self loops), bridges, articulation points, biconnected components, SCC (Tarjan), Euler path (Hierholzer), bipartite coloring, topological sort (Kahn), Dijkstra, Floyd-Warshall, Dinic max flow, Kuhn bipartite matching, Hungarian assignment, dominator tree |
 | `trees/` | binary lifting / LCA, tree diameter, sum of all pair distances |
 | `strings/` | generalized suffix automaton |
-| `strings/hashing/` | polynomial rolling hash, substring hash, double hash, double hash with lcp |
+| `strings/hashing/` | polynomial rolling hash, substring hash, double hash, double hash with lcp, palindrome tracker (push_back / pop_back) |
 | `geometry/` | integer convex hull + point in convex polygon, Minkowski sum, 3d point / segment / triangle distances |
 
 ## problems/
