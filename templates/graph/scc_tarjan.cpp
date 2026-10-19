@@ -1,3 +1,4 @@
+// tarjan scc (iterative). scc sc(n); sc.add_edge(u, v); sc.build();
 struct scc
 {
     int n, timer, nc;
@@ -57,14 +58,11 @@ struct scc
     }
 
     void build() { rep(i, 0, n) if (!num[i]) run(i); }
-};  
+};
 
-
-
-
-scc sc(n + 1);
-sc.add_edge(a, b);
-sc.build();
+// scc sc(n + 1);
+// sc.add_edge(a, b);
+// sc.build();
 // sc.comp[v] = component id of v
 // sc.comps   = list of components, sinks first
 // sc.g       = the graph (reuse it, don't build a second one)

@@ -1,5 +1,5 @@
 // ================ Author: Rayyan Khalil ================
-#define DEBUG
+// #define DEBUG // local only (or compile with -DDEBUG)
 
 #include <bits/stdc++.h>
 // #include <ext/pb_ds/assoc_container.hpp>

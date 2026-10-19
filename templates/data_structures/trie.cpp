@@ -99,31 +99,4 @@ public:
     }
 
 };
-
-//================ Code starts here ================
-void
-solve()
-{
-    int n;
-    cin >>n;
-    Trie trie;
-    rep(i,0,n){
-        string s;
-        cin >>s;
-        trie.insert(s);
-
-    }
-    int q;
-    cin >>q;
-    while(q--){
-        string s;
-        cin >>s;
-        if(trie.search(s)){
-            cout<<"Found\n";
-        }
-        else{
-            cout<<"Not Found\n";
-        }
-    }
-
-}
+// usage: Trie t; t.insert(s); t.search(s); t.countWordsStartingWith(p); t.erase(s). lowercase only

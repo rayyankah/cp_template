@@ -1,24 +1,27 @@
-//range minimum query
-int getMin(int l, int r)
+// sqrt decomposition: point update, range min. SqrtMin s(a); s.update(i, x); s.query(l, r) inclusive
+struct SqrtMin
 {
-    int LB = l / BLK;
-    int RB = r / BLK;
-    int mn = INT_MAX;
-
-    if (LB == RB)
-        for (int i = l; i <= r; i++)
-            mn = min(ar[i], mn);
-    else
+    int n, B;
+    vi a, blk;
+    SqrtMin(const vi &v) : n(v.size()), a(v)
     {
-        for (int i = l; i < (LB + 1) * BLK; i++)
-            mn = min(mn, ar[i]);
-
-        for (int i = LB + 1; i < RB; i++)
-            mn = min(mn, F[i]);
-
-        for (int i = RB * BLK; i <= r; i++)
-            mn = min(mn, ar[i]);
+        B = max(1LL, (int)sqrt(n));
+        blk.assign(n / B + 1, LLONG_MAX);
+        rep(i, 0, n) blk[i / B] = min(blk[i / B], a[i]);
     }
-
-    return mn;
-}
+    void update(int i, int x)
+    {
+        a[i] = x;
+        int b = i / B;
+        blk[b] = LLONG_MAX;
+        rep(j, b * B, min(n, (b + 1) * B)) blk[b] = min(blk[b], a[j]);
+    }
+    int query(int l, int r)
+    {
+        int res = LLONG_MAX;
+        while (l <= r && l % B) res = min(res, a[l++]);
+        while (l + B - 1 <= r) res = min(res, blk[l / B]), l += B;
+        while (l <= r) res = min(res, a[l++]);
+        return res;
+    }
+};

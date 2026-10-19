@@ -17,7 +17,7 @@ int query(int idx, int l, int r, int ql, int qr){
         return seg[idx];//completely inside
     }
     if(l>qr || r<ql){
-        return INT_MIN;//completely outside
+        return LLONG_MIN;//completely outside
     }
     int mid = l+(r-l)/2;
     int left = query(2*idx+1, l,mid, ql, qr);

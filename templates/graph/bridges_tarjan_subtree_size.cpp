@@ -1,3 +1,4 @@
+// simple graphs only (skips every edge to the parent). for multi-edges use LowLink in bridges.cpp
 // bridge -> any edge on who's removal the graph becomes disconnected and no of connected components +=1
 //  time[] - > time of first visit of a node
 //  low[] -> lowest time of visit of a node that can be reached from the subtree of that node (including itself)-> (not including parent)

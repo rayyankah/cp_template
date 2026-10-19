@@ -1,23 +1,18 @@
-//substring hash
-int pref[N];
-int inv_pref[N];
-void compute_pref_hash(string &s, int p = 31){
-    ll p_power = 1;
-    inv_pref[0] = 1;
-    pref[0] = (s[0] - 'a' + 1);
-    for(int i=1; i<s.size(); i++){
-        p_power= (binMul(p_power, p, MOD));
-        pref[i] = (pref[i-1] +( s[i]-'a'+1)*p_power)%MOD;
-        inv_pref[i] = binExp(p_power, MOD-2);
+// single-mod substring hash, O(n) build, O(1) query. for safety prefer double_hash.cpp
+// SingleHash h(s); h.get(l, r) = hash of s[l..r] (0-based, inclusive)
+struct SingleHash
+{
+    static const int M = 1000000007, B = 131;
+    vi h, pw;
+    SingleHash(const string &s)
+    {
+        int n = s.size();
+        h.assign(n + 1, 0), pw.assign(n + 1, 1);
+        rep(i, 0, n)
+        {
+            h[i + 1] = (h[i] * B + (unsigned char)s[i]) % M;
+            pw[i + 1] = pw[i] * B % M;
+        }
     }
-
-}
-ll substringHash(int l, int r, int p = 31){
-    if(l==0) return pref[r];
-    ll hash_value = (pref[r]-pref[l-1]);
-    hash_value%=MOD;
-    if(hash_value<0) hash_value+=MOD;
-    hash_value = binMul(hash_value, inv_pref[l], MOD);
-    return hash_value;
-
-}
+    int get(int l, int r) { return (h[r + 1] - h[l] * pw[r - l + 1] % M + M) % M; }
+};

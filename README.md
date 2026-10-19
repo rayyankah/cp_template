@@ -13,18 +13,19 @@ Most snippets assume the macros from `templates/base/cp_template.cpp` (`int` = `
 
 | Folder | Contents |
 |---|---|
-| `base/` | `cp_template.cpp`, the main starter file (debug, binExp, factorials/nCr, Mint, sieve, anti-hack hash) |
-| `number_theory/` | Euler totient, Mobius (standalone full templates) |
-| `math/` | 2x2 linear equation solver, NTT (polynomial multiply), exact convolution (two primes + CRT), FWHT (xor convolution) |
+| `base/` | `cp_template.cpp`, the main starter file (debug, binExp/binMul safe up to 1e18, factorials/nCr, Mint, linear sieve + factorize, anti-hack hash) |
+| `misc/` | coordinate compression, LIS, binary / ternary search, submask + SOS dp, __int128 io, digit dp skeleton, stress test script + generator |
+| `number_theory/` | Miller-Rabin + Pollard rho, CRT (any moduli) + general inverse, linear sieve (mu, phi) + segmented sieve, discrete log, Euler totient, Mobius (full templates) |
+| `math/` | matrix power, Gaussian elimination mod p + xor basis, Lagrange interpolation, FFT, NTT, exact convolution (two primes + CRT), FWHT, 2x2 linear equations |
 | `combinatorics/` | full combinatorics template, Catalan numbers, de Bruijn sequence |
-| `data_structures/` | DSU, DSU with parity, offline DSU (reverse edge deletion), sparse table, trie, xor minimum spanning tree |
-| `data_structures/segment_tree/` | generic lazy segment tree, max segment tree, point update, lazy range-add sum, range-add max |
-| `data_structures/sqrt_decomposition/` | range min query, sqrt decomposition with lazy min update |
-| `graph/` | finding one simple cycle (directed / undirected, multi-edges, self loops), bridges, articulation points, biconnected components, SCC (Tarjan), Euler path (Hierholzer), bipartite coloring, topological sort (Kahn), Dijkstra, Floyd-Warshall, Dinic max flow, Kuhn bipartite matching, Hungarian assignment, dominator tree |
-| `trees/` | binary lifting / LCA, tree diameter, sum of all pair distances |
-| `strings/` | generalized suffix automaton |
-| `strings/hashing/` | polynomial rolling hash, substring hash, double hash, double hash with lcp, palindrome tracker (push_back / pop_back) |
-| `geometry/` | integer convex hull + point in convex polygon, Minkowski sum, 3d point / segment / triangle distances |
+| `data_structures/` | DSU, DSU with parity, rollback DSU, offline edge deletion, Fenwick (point, range, 2d, lower bound), sparse table, ordered set (pb_ds), Li Chao tree, Mo's algorithm, persistent segment tree (k-th smallest), implicit treap, trie, binary trie (max/min xor), xor MST |
+| `data_structures/segment_tree/` | generic lazy segment tree, iterative point-update tree, lazy range-add sum, max segment tree, range-add max |
+| `data_structures/sqrt_decomposition/` | point update range min, range chmin + range sum |
+| `graph/` | Dijkstra + 0-1 BFS, Bellman-Ford (negative cycles), Floyd-Warshall, Kruskal, bridges + articulation points + 2-edge components (multi-edge safe), biconnected components, SCC (Tarjan), 2-SAT, topological sort, bipartite coloring, Euler path (directed / undirected), one simple cycle, Kuhn, Hopcroft-Karp, Hungarian, Dinic, min cost max flow, dominator tree |
+| `trees/` | binary lifting LCA, HLD, centroid decomposition, tree diameter, sum of all pair distances |
+| `strings/` | KMP (+ automaton), Z function, Manacher, suffix array + LCP, Aho-Corasick, minimal rotation, palindromic tree, generalized suffix automaton |
+| `strings/hashing/` | double hash (Hash struct, preCompute), single substring hash, whole-string hash, double hash with lcp, palindrome tracker (push_back / pop_back) |
+| `geometry/` | 2d kit (exact segment intersection, point in polygon, area, Pick, closest pair, rotating calipers, angle sort, line / circle intersections), integer convex hull + point in convex polygon, Minkowski sum, 3d distances |
 
 ## problems/
 

@@ -1,5 +1,5 @@
 // ================ Author: Rayyan Khalil ================
-#define DEBUG
+// #define DEBUG // local only (or compile with -DDEBUG). never submit with it on: cerr output in loops causes TLE
 
 #include <bits/stdc++.h>
 // #include <ext/pb_ds/assoc_container.hpp>
@@ -86,26 +86,17 @@ template <class A, class B> void read(pair<A, B> &p) { read(p.first), read(p.sec
 template <class T> void read(vector<T> &a) { for (auto &x : a) read(x); }
 
 // ================ Math ================
+int binMul(int a, int b, int m) { return (__int128)a * b % m; } // a * b % m for m up to 1e18
 int binExp(int a, int b, int m = MOD)
 {
-    int res = 1;
+    int res = 1 % m;
     a %= m;
+    if (a < 0) a += m;
+    bool big = m > 3000000000LL; // a * a would overflow long long
     while (b > 0)
     {
-        if (b & 1) res = res * a % m;
-        a = a * a % m;
-        b >>= 1;
-    }
-    return res;
-}
-int binMul(int a, int b, int m)
-{
-    int res = 0;
-    a %= m;
-    while (b > 0)
-    {
-        if (b & 1) res = (res + a) % m;
-        a = (a + a) % m;
+        if (b & 1) res = big ? binMul(res, a, m) : res * a % m;
+        a = big ? binMul(a, a, m) : a * a % m;
         b >>= 1;
     }
     return res;
@@ -164,24 +155,21 @@ struct Mint
 // ================ Sieve ================
 vi spf;
 vector<bool> isPrime;
-vector<vpi> distinct_primes;
-vpi factorize(int x);
-void sieve()
+vi primes;
+void sieve() // spf, isPrime, primes up to N - 1, O(N)
 {
-    spf.assign(N, 0), isPrime.assign(N, 0), distinct_primes.resize(N);
+    spf.assign(N, 0), isPrime.assign(N, 0), primes.clear();
     rep(i, 2, N)
     {
-        if (spf[i] == 0)
+        if (spf[i] == 0) spf[i] = i, isPrime[i] = 1, primes.pb(i);
+        for (int p : primes)
         {
-            spf[i] = i;
-            isPrime[i] = 1;
-            for (int j = i * i; j < N; j += i)
-                if (spf[j] == 0) spf[j] = i;
+            if (p > spf[i] || i * p >= N) break;
+            spf[i * p] = p;
         }
     }
-    rep(i, 2, N) distinct_primes[i] = factorize(i);
 }
-vpi factorize(int x)
+vpi factorize(int x) // needs sieve(), x < N. {prime, exponent}
 {
     vpi res;
     while (x > 1)

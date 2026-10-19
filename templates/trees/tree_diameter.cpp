@@ -1,52 +1,22 @@
-//diameter of a tree
-#include <bits/stdc++.h>
-using namespace std;
-
-const int N = 200005;
-vector<int> adj[N];
-bool visited[N];
-int n;
-
-int farNode, maxDist;
-
-void dfs(int u, int dist) {
-    visited[u] = true;
-    if (dist > maxDist) {
-        maxDist = dist;
-        farNode = u;
-    }
-    for (int v : adj[u]) {
-        if (!visited[v]) {
-            dfs(v, dist + 1);
+// tree diameter by two bfs. returns {length (edges), {end a, end b}}; works for any node labels 0..n-1 / 1..n
+pair<int, pi> diameter(const vvi &g, int start)
+{
+    auto bfs = [&](int s, vi &d)
+    {
+        d.assign(g.size(), -1);
+        queue<int> q;
+        d[s] = 0, q.push(s);
+        int far = s;
+        while (!q.empty())
+        {
+            int v = q.front(); q.pop();
+            if (d[v] > d[far]) far = v;
+            for (int u : g[v]) if (d[u] == -1) d[u] = d[v] + 1, q.push(u);
         }
-    }
+        return far;
+    };
+    vi d1, d2;
+    int a = bfs(start, d1), b = bfs(a, d2);
+    return {d2[b], {a, b}};
 }
-
-int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    cin >> n;
-    for (int i = 0; i < n - 1; i++) {
-        int u, v;
-        cin >> u >> v;
-        adj[u].push_back(v);
-        adj[v].push_back(u);
-    }
-
-    // First DFS from node 1
-    fill(visited, visited + n + 1, false);
-    maxDist = -1;
-    dfs(1, 0);
-
-    // Second DFS from farNode
-    fill(visited, visited + n + 1, false);
-    maxDist = -1;
-    dfs(farNode, 0);
-
-    int diameter = maxDist;
-    int ans = 2 * (n - 1) - diameter;
-    cout << ans << "\n";
-
-    return 0;
-}
+// for every v: farthest distance = max(dist(a, v), dist(b, v))

@@ -1,6 +1,6 @@
 // ntt mod 998244353: multiply(a, b) returns the product polynomial
 // example use: 103119A Accelerator (product of (1 + a_i x) by divide and conquer)
-const int md = 998244353, g = 3;
+const int md = 998244353, ntt_root = 3;
 void ntt(vi &a, bool inv)
 {
     int n = a.size();
@@ -13,7 +13,7 @@ void ntt(vi &a, bool inv)
     }
     for (int len = 2; len <= n; len <<= 1)
     {
-        int w = binExp(g, (md - 1) / len, md);
+        int w = binExp(ntt_root, (md - 1) / len, md);
         if (inv) w = binExp(w, md - 2, md);
         for (int i = 0; i < n; i += len)
         {

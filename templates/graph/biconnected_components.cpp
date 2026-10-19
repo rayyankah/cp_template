@@ -1,143 +1,51 @@
-//finding bi connected componenets... 
-const int maxN = 1e5 + 10;
-vi adj[maxN];
-si articulation_points;
-int vis[maxN], in[maxN], low[maxN];
-int timer; // initialized in solve
-vector<vector<pair<int, int>>> bcc;
-stack<pi> st;
-
-void dfs(int node, int parent = -1)
+// vertex biconnected components (blocks), handles multi-edges. BCC b(n); b.add(u, v); b.run();
+// b.comps[i] = list of edge ids in block i; b.isCut[v]. isolated vertices belong to no block.
+// recursive dfs: fine for n up to ~2e5 on most judges
+struct BCC
 {
-    vis[node] = 1;
-    in[node] = low[node] = ++timer;   
-    int children = 0;
-    for (int &child : adj[node])
+    int n, m = 0, timer = 0;
+    vector<vpi> g; // {to, edge id}
+    vi tin, low, isCut, st;
+    vvi comps;
+    vpi edges;
+    BCC(int n) : n(n), g(n) {}
+    void add(int u, int v) { g[u].pb({v, m}), g[v].pb({u, m}), edges.pb({u, v}), m++; }
+    void dfs(int v, int pe)
     {
-        if (child == parent)
-            continue;
-        if (vis[child])
+        tin[v] = low[v] = timer++;
+        int kids = 0;
+        for (auto &e : g[v])
         {
-            // back edge to an ancestor: push when it's an ancestor (in[child] < in[node])
-            if (in[child] < in[node]) {
-                st.push({node, child});
-            }
-            low[node] = min(low[node], in[child]);
-        }
-        else
-        {
-            // forward (tree) edge
-            st.push({node, child});
-            dfs(child, node);
-            if (low[child] >= in[node] || parent == -1)
+            int to = e.first, id = e.second;
+            if (id == pe) continue;
+            if (tin[to] != -1)
             {
-                vpi curr_bcc;
-                while (!st.empty() && st.top() != make_pair(node, child) && st.top() != make_pair(child, node))
+                if (tin[to] < tin[v]) st.pb(id); // back edge, push once
+                low[v] = min(low[v], tin[to]);
+                continue;
+            }
+            st.pb(id);
+            dfs(to, id);
+            kids++;
+            low[v] = min(low[v], low[to]);
+            if (low[to] >= tin[v])
+            {
+                if (pe != -1) isCut[v] = 1;
+                vi comp;
+                while (true)
                 {
-                    curr_bcc.push_back(st.top());
-                    st.pop();
+                    int x = st.back(); st.pop_back();
+                    comp.pb(x);
+                    if (x == id) break;
                 }
-                if (!st.empty()) {
-                    curr_bcc.push_back(st.top());
-                    st.pop();
-                }
-                bcc.push_back(curr_bcc);
+                comps.pb(comp);
             }
-
-            low[node] = min(low[node], low[child]);
-            children++;
         }
+        if (pe == -1 && kids > 1) isCut[v] = 1;
     }
-    if (parent == -1 && children > 1)
+    void run()
     {
-        articulation_points.insert(node);
+        tin.assign(n, -1), low.assign(n, 0), isCut.assign(n, 0);
+        rep(v, 0, n) if (tin[v] == -1) dfs(v, -1);
     }
-}
-
-//================ Code starts here ================
-void solve()
-{
-    int n, m;
-    cin >> n >> m;
-
-    for (int i = 1; i <= n; ++i) {
-        adj[i].clear();
-        vis[i] = 0;
-        in[i] = low[i] = 0;
-    }
-    while (!st.empty()) st.pop();
-    bcc.clear();
-    articulation_points.clear();
-    timer = 0;
-
-    while (m--)
-    {
-        int u, v;
-        cin >> u >> v;
-        adj[u].push_back(v);
-        adj[v].push_back(u);
-    }
-    for (int i = 1; i <= n; i++)
-    {
-        if (!vis[i])
-        {
-            dfs(i);
-            vpi curr_bcc;
-            while (!st.empty())
-            {
-                curr_bcc.push_back(st.top());
-                st.pop();
-            }
-            if (!curr_bcc.empty())
-                bcc.push_back(curr_bcc);
-        }
-    }
-    cout << "bcc are:" << '\n';
-    for (auto &component : bcc)
-    {
-        for (auto &edge : component)
-        {
-            cout << edge.first << "-" << edge.second << ", ";
-        }
-        cout << '\n';
-    }
-}
-
-//================ Code starts here ================
-void solve()
-{
-    int n, m;
-    cin >> n >> m;
-    while (m--)
-    {
-        int u, v;
-        cin >> u >> v;
-        adj[u].pb(v);
-        adj[v].pb(u);
-    }
-    for (int i = 1; i <= n; i++)
-    {
-        if (!vis[i])
-        {
-            dfs(i);
-            vpi curr_bcc;
-            while (!st.empty())
-            {
-                curr_bcc.pb(st.top());
-                st.pop();
-            }
-            if (!curr_bcc.empty())
-                bcc.pb(curr_bcc);
-            
-        }
-    }
-    cout << "bcc are:" << nl;
-    for (auto &component : bcc)
-    {
-        for (auto &edge : component)
-        {
-            cout << edge.first << "-" << edge.second << ", ";
-        }
-        cout << nl;
-    }
-}
+};

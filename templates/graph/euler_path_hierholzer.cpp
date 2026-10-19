@@ -1,95 +1,51 @@
-// finding eulerian path/circuit
-const int MAXN = 100005;
-int deg[MAXN];
-bool hasEulerPath(int n) {
-    int odd = 0;
-    for (int i = 0; i <= n; ++i) if (deg[i] & 1) ++odd;
-    return (odd == 0 || odd == 2);
-}
-
-// Hierholzer: recursive removal using multiset adjacency
-void findEulerPathOrCircuit(int u, vector<int> &res, vector<multiset<int>> &adj) {
-    while (!adj[u].empty()) {
-        int v = *adj[u].begin();
-        // remove edge u-v from both sides
-        adj[u].erase(adj[u].begin());
-        auto it = adj[v].find(u);
-        if (it != adj[v].end()) adj[v].erase(it);
-        findEulerPathOrCircuit(v, res, adj);
-    }
-    res.push_back(u);
-}
-
-//================ Code starts here ================
-void solve()
+// euler path / circuit (hierholzer, iterative, O(n + m)), multi-edges and self loops ok
+// eulerPath(n, edges, directed, start): vertex sequence using every edge once, or {} if impossible
+// start = -1 picks a valid start automatically (odd vertex / out-in = 1, else any vertex with an edge)
+// for a circuit check path.front() == path.back()
+vi eulerPath(int n, const vpi &edges, bool directed, int start = -1)
 {
-     int n, m;
-    cin >>n>>m;
-    
-    // reset degree array for safety (in case of multiple runs)
-    for (int i = 1; i <= n; ++i) deg[i] = 0;
-    
-    vector<pair<int,int>> edges;
-    edges.reserve(m);
-    vector<multiset<int>> adjm(n + 1);
-    
-    for (int i = 0; i < m; ++i) {
-        int u, v;
-        cin >> u >> v;
-        edges.emplace_back(u, v);
-        adjm[u].insert(v);
-        adjm[v].insert(u);
-        ++deg[u];
-        ++deg[v];
+    int m = edges.size();
+    vector<vpi> g(n);
+    vi deg(n, 0), in(n, 0);
+    rep(i, 0, m)
+    {
+        int u = edges[i].first, v = edges[i].second;
+        g[u].pb({v, i}), deg[u]++, in[v]++;
+        if (!directed) g[v].pb({u, i}), deg[v]++;
     }
-
-    if (m == 0) {
-        cout << "NO\n";
-        return;
-    }
-    
-    if (!hasEulerPath(n)) {
-        cout << "NO\n";
-        return;
-    }
-    
-    // find start vertex: first vertex with odd degree if any, otherwise any vertex with degree > 0
-    int start = -1;
-    for (int i = 0; i <= n; ++i) {
-        if (deg[i] & 1) { start = i; break; }
-    }
-    if (start == -1) {
-        for (int i = 0; i <= n; ++i) if (deg[i] > 0) { start = i; break; }
-    }
-    if (start == -1) { // no vertex with degree > 0 but m>0 shouldn't happen
-        cout << "NO\n";
-        return;
-    }
-    
-   
-    vector<int> ans;
-    findEulerPathOrCircuit(start, ans, adjm);
-    reverse(ans.begin(), ans.end());
-    
-    // Validate: Euler path/circuit must use exactly all edges -> path length == m + 1
-    if ((int)ans.size() != m + 1) {
-        cout << "NO\n";
-        return;
-    }
-
-    for (int i = 0; i <= n; ++i) {
-        if (!adjm[i].empty()) {
-            cout << "NO\n";
-            return;
+    if (start == -1)
+    {
+        rep(v, 0, n) if (deg[v]) { start = v; break; }
+        if (start == -1) return {0};
+        rep(v, 0, n)
+        {
+            if (directed && deg[v] - in[v] == 1) { start = v; break; }
+            if (!directed && deg[v] % 2) { start = v; break; }
         }
     }
-    
-    // OK: print path
-    for (int i = 0; i < (int)ans.size(); ++i) {
-        if (i) cout << ' ';
-        cout << ans[i];
+    // degree conditions
+    int bad = 0;
+    rep(v, 0, n)
+    {
+        int d = directed ? deg[v] - in[v] : deg[v] % 2;
+        if (directed && d != 0 && !((d == 1 && v == start) || d == -1)) bad++;
+        if (directed && (d > 1 || d < -1)) bad++;
+        if (!directed && d && v != start) bad++;
     }
-    cout << '\n';
-    return;
-
+    if (directed ? bad > 0 : bad > 1) return {};
+    if (!directed && bad == 1 && deg[start] % 2 == 0) return {};
+    vector<char> used(m, 0);
+    vi it(n, 0), st = {start}, path;
+    while (!st.empty())
+    {
+        int v = st.back();
+        while (it[v] < (int)g[v].size() && used[g[v][it[v]].second]) it[v]++;
+        if (it[v] == (int)g[v].size()) { path.pb(v); st.pop_back(); continue; }
+        auto e = g[v][it[v]++];
+        used[e.second] = 1;
+        st.pb(e.first);
+    }
+    reverse(all(path));
+    if ((int)path.size() != m + 1) return {}; // disconnected edges
+    return path;
 }

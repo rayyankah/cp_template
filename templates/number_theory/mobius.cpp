@@ -1,5 +1,5 @@
 // ================ Author: Rayyan Khalil ================
-#define DEBUG   // <-- comment this ONE line to disable every debug(...)
+// #define DEBUG // local only (or compile with -DDEBUG)
 
 #include <bits/stdc++.h>
 // #include <ext/pb_ds/assoc_container.hpp>
@@ -34,26 +34,18 @@ int rndRange(int l, int r) { return rnd() % (r - l + 1) + l; } // random in [l,r
 // debug(x, v, st, mp, ...)  -> prints anything: ints, strings, pairs, vector, set, map, nested...
 // debugArr(a, n)            -> prints first n elements of a C array
 #ifdef DEBUG
+template <class... Ts> struct make_void_ { typedef void type; };
+template <class... Ts> using void_t_ = typename make_void_<Ts...>::type;
 template <class T, class = void> struct is_iterable : false_type {};
-template <class T> struct is_iterable<T, void_t<decltype(begin(declval<T &>())), decltype(end(declval<T &>()))>> : true_type {};
+template <class T> struct is_iterable<T, void_t_<decltype(begin(declval<T &>())), decltype(end(declval<T &>()))>> : true_type {};
 
+void _print(const string &s);
+void _print(const char *s);
 template <class A, class B> void _print(const pair<A, B> &p);
-template <class T> void _print(const T &x)
-{
-    if constexpr (is_iterable<T>::value && !is_same_v<T, string>)
-    {
-        cerr << "{";
-        bool first = true;
-        for (auto &&e : x)
-        {
-            if (!first) cerr << ", ";
-            first = false;
-            _print(e);
-        }
-        cerr << "}";
-    }
-    else cerr << x;
-}
+template <class T> void _print(const T &x);
+
+void _print(const string &s) { cerr << s; }
+void _print(const char *s) { cerr << s; }
 template <class A, class B> void _print(const pair<A, B> &p)
 {
     cerr << "(";
@@ -62,6 +54,21 @@ template <class A, class B> void _print(const pair<A, B> &p)
     _print(p.second);
     cerr << ")";
 }
+template <class T> void _print_impl(const T &x, true_type)
+{
+    cerr << "{";
+    bool first = true;
+    for (auto &&e : x)
+    {
+        if (!first) cerr << ", ";
+        first = false;
+        _print(e);
+    }
+    cerr << "}";
+}
+template <class T> void _print_impl(const T &x, false_type) { cerr << x; }
+template <class T> void _print(const T &x) { _print_impl(x, integral_constant<bool, is_iterable<T>::value>()); }
+
 void _dbg() { cerr << nl; }
 template <class H, class... T> void _dbg(const H &h, const T &...t)
 {
@@ -364,7 +371,7 @@ void solve()
 
     // ---- 3. sqf_divisors(x): divisors with nonzero mu ----
     cout << "sqf_divisors(12) = ";
-    for (auto [d, m] : sqf_divisors(12)) cout << "(" << d << "," << m << ") ";
+    for (auto dm : sqf_divisors(12)) cout << "(" << dm.first << "," << dm.second << ") ";
     cout << "| (1,1) (2,-1) (3,-1) (6,1)" << nl;
 
     // ---- 4. count_multiples: cnt[d] for the lesson array ----
