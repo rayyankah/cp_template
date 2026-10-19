@@ -1,10 +1,11 @@
 // aho corasick over 'a'..'z'. AhoCorasick ac; id = ac.add(word); ac.build();
 // walk: v = ac.go[v][c]. ac.out[v] = number of words ending at v or at any suffix link of v (after build)
 // to list matches, follow ac.dict[v] (next node on the suffix-link chain that ends a word)
+// ac.bfs = nodes in bfs order (increasing depth): to push values up the suffix links, loop it backwards
 struct AhoCorasick
 {
-    vector<array<int, 26>> go;
-    vi link, out, dict, endHere;
+    vector<array<int32_t, 26>> go; // int32 keeps memory low
+    vi link, out, dict, endHere, bfs;
     AhoCorasick() { node(); }
     int node()
     {
@@ -27,6 +28,7 @@ struct AhoCorasick
     void build() // bfs, turns go[][] into a full automaton
     {
         queue<int> q;
+        bfs = {0};
         rep(c, 0, 26)
         {
             if (go[0][c] == -1) go[0][c] = 0;
@@ -35,6 +37,7 @@ struct AhoCorasick
         while (!q.empty())
         {
             int v = q.front(); q.pop();
+            bfs.pb(v);
             out[v] += out[link[v]];
             dict[v] = endHere[link[v]] ? link[v] : dict[link[v]];
             rep(c, 0, 26)

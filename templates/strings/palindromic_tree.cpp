@@ -3,7 +3,7 @@
 // number of distinct palindromes = t.len.size() - 2. cnt[v] (after t.count()) = occurrences of node v's palindrome
 struct Eertree
 {
-    vector<array<int, 26>> nx;
+    vector<array<int32_t, 26>> nx; // int32 keeps memory low
     vi len, link, cnt;
     string s;
     int last = 1;
