@@ -1,10 +1,10 @@
-// binary trie on numbers < 2^30: insert / erase (multiset) / max xor with x / min xor with x
+// binary trie on numbers < 2^B (BinTrie t(40) for values up to 1e12): insert / erase (multiset) / max xor with x / min xor with x
 struct BinTrie
 {
-    static const int B = 30;
+    int B;
     vector<array<int, 2>> nx;
     vi cnt;
-    BinTrie() { nx.pb({0, 0}), cnt.pb(0); }
+    BinTrie(int bits = 30) : B(bits) { nx.pb({0, 0}), cnt.pb(0); }
     void insert(int x, int d = 1) // d = -1 erases one copy
     {
         int v = 0;
