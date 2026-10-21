@@ -52,3 +52,14 @@ struct DynHash
 };
 // palindrome check on s[l..r] with updates: keep DynHash f(s) and g(reversed s);
 // s[l..r] is a palindrome  <=>  f.get(l, r) == g.get(n - 1 - r, n - 1 - l)
+// the same with updates: DynPal p(s); p.set(i, c); p.isPal(l, r); p.bwd(l, r) = hash of s[l..r] read backwards
+struct DynPal
+{
+    int n;
+    DynHash f, g;
+    DynPal(const string &s) : n(s.size()), f(s), g(string(s.rbegin(), s.rend())) {}
+    void set(int i, int c) { f.set(i, c), g.set(n - 1 - i, c); }
+    pi fwd(int l, int r) { return f.get(l, r); }
+    pi bwd(int l, int r) { return g.get(n - 1 - r, n - 1 - l); }
+    bool isPal(int l, int r) { return l >= r || fwd(l, r) == bwd(l, r); }
+};
