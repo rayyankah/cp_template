@@ -34,18 +34,18 @@ int pollard(int n)
         auto f = [&](int v) { return (mulmod(v, v, n) + c) % n; };
         while (d == 1)
         {
-            int prod = 1; // batch gcds
+            int prod = 1, sx = x, sy = y; // batch 64 gcds into one; remember the batch start
             rep(i, 0, 64)
             {
                 x = f(x), y = f(f(y));
                 int t = mulmod(prod, llabs(x - y), n);
-                if (t == 0) break;
+                if (t == 0) { prod = 0; break; } // collided mod every factor: gcd(0, n) = n sends us to the fallback
                 prod = t;
             }
             d = __gcd(prod, n);
-            if (prod == 1 || d == n) // fall back to step-by-step
+            if (d == n) // replay this batch one step at a time from its start
             {
-                d = 1;
+                x = sx, y = sy, d = 1;
                 while (d == 1) x = f(x), y = f(f(y)), d = __gcd(llabs(x - y), n);
             }
         }
