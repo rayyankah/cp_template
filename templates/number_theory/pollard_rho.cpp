@@ -43,7 +43,7 @@ int pollard(int n)
                 prod = t;
             }
             d = __gcd(prod, n);
-            if (d == n) // replay this batch one step at a time from its start
+            if (prod == 1 || d == n) // fall back to step-by-step, replaying this batch from its start
             {
                 x = sx, y = sy, d = 1;
                 while (d == 1) x = f(x), y = f(f(y)), d = __gcd(llabs(x - y), n);
