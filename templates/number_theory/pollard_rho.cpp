@@ -62,3 +62,31 @@ void factorRec(int n, vi &out)
     factorRec(d, out), factorRec(n / d, out);
 }
 vi factor(int n) { vi f; factorRec(n, f); sort(all(f)); return f; }
+
+vi getDivisors(int n)
+{
+    vi pf = factor(n);
+    vi divs = {1};
+    for (int i = 0; i < (int)pf.size(); )
+    {
+        int p = pf[i], cnt = 0;
+        while (i < (int)pf.size() && pf[i] == p) cnt++, i++;
+        int sz = divs.size();
+        int pw = 1;
+        rep(c, 0, cnt)
+        {
+            pw *= p;
+            rep(j, 0, sz) divs.pb(divs[j] * pw);
+        }
+    }
+    sort(all(divs)); // Optional: remove if you don't need them sorted
+    return divs;
+}
+
+int phi(int n)
+{
+    vi pf = factor(n);
+    pf.erase(unique(all(pf)), pf.end()); // Keep only distinct prime factors
+    for (int p : pf) n = n / p * (p - 1);
+    return n;
+}
