@@ -29,3 +29,17 @@ int coprimeCount(int R, const vi &ps) // ps = distinct primes of d
     return res; // count in [L, R] = coprimeCount(R) - coprimeCount(L - 1)
 }
 vi distinctPrimes(int d) { vi ps; for (int p = 2; p * p <= d; p++) if (d % p == 0) { ps.pb(p); while (d % p == 0) d /= p; } if (d > 1) ps.pb(d); return ps; }
+// floor sum: sum_{i=0}^{n-1} floor((a*i + b) / m), n >= 0, m >= 1, a, b >= 0, O(log). lattice points under a line
+int floorSum(int n, int m, int a, int b)
+{
+    int ans = 0;
+    while (true)
+    {
+        if (a >= m) ans += (n - 1) * n / 2 * (a / m), a %= m;
+        if (b >= m) ans += n * (b / m), b %= m;
+        int y = a * n + b;
+        if (y < m) break;
+        n = y / m, b = y % m, swap(m, a);
+    }
+    return ans;
+}
