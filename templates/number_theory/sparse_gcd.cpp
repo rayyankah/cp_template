@@ -1,4 +1,5 @@
 // sparse table for range gcd: O(n log n) build, O(1) query rangeGCD(l, r) on 0-indexed [l, r]
+const int MAXN = 200005, MAXLOG = 18; // MAXLOG > log2(MAXN)
 int n, q;
 int a[MAXN];
 int st[MAXN][MAXLOG];
