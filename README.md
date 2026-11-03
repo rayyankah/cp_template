@@ -26,7 +26,7 @@ Most snippets assume the macros from `templates/base/cp_template.cpp` (`int` = `
 | `trees/` | binary lifting LCA, HLD, centroid decomposition, tree diameter, sum of all pair distances, rerooting dp (sum of distances to every vertex) |
 | `strings/` | KMP (+ automaton), Z function, Manacher, suffix array + LCP, Aho-Corasick, suffix automaton (+ generalized), palindromic tree, minimal rotation, Lyndon (Duval), wildcard matching (FFT), string DP (edit distance, LCS, distinct subsequences), bracket sequences, expression parser, big integers (decimal strings), subsequence automaton, Burrows-Wheeler transform |
 | `strings/hashing/` | double hash (Hash struct, preCompute), hashing with point updates (DynHash, DynPal), forward + backward hash with O(1) palindrome check (PalHash), single substring hash, whole-string hash, lcp of suffixes of one or two different strings (needs double_hash), palindrome tracker (push_back / pop_back), set / multiset hashing with random values (xor_hash), 2D hashing |
-| `geometry/` | 2d kit (exact segment intersection, point in polygon, area, Pick, closest pair, rotating calipers, angle sort, line / circle intersections), integer convex hull + point in convex polygon, Minkowski sum, 3d distances |
+| `geometry/` | 2d kit (exact segment intersection, point in polygon, area, Pick, closest pair, rotating calipers, angle sort, line / circle intersections), integer convex hull + point in convex polygon, Minkowski sum, 3d distances, convex polygon cut / half-plane intersection / polygon kernel, minimum enclosing circle (Welzl), circle intersection area, union area of rectangles (`geometry_more.cpp`) |
 
 ## problems/
 
