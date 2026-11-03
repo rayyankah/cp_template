@@ -13,7 +13,7 @@ Most snippets assume the macros from `templates/base/cp_template.cpp` (`int` = `
 
 | Folder | Contents |
 |---|---|
-| `dp/` | knapsack, bitset subset sum, counting subset sums, bitmask TSP, interval dp, LCS, Kadane |
+| `dp/` | knapsack, bitset subset sum, counting subset sums, bitmask TSP, interval dp, LCS, Kadane; optimizations (divide & conquer, Knuth, monotone CHT, slope trick); bounded knapsack (binary bundles), counting increasing subsequences, distinct subsequences by length, pattern-avoiding strings (KMP automaton dp), broken profile tilings, SOS over supermasks + AND = 0 subsets, meet in the middle subset count |
 | `base/` | `cp_template.cpp`, the main starter file (debug, binExp/binMul safe up to 1e18, factorials/nCr, Mint, linear sieve + factorize, anti-hack hash) |
 | `misc/` | coordinate compression, LIS, binary / ternary search, submask + SOS dp, __int128 io, digit dp skeleton, stress test script + generator, bit identities + max AND pair (bit_tricks), fast reader (fast_io), grundy brute-force table (grundy_brute) |
 | `number_theory/` | Miller-Rabin + Pollard rho, CRT (any moduli) + general inverse, linear sieve (mu, phi) + segmented sieve, discrete log, Euler totient, Mobius (full templates), floor blocks + coprime count by inclusion-exclusion (floor_blocks), huge-exponent power + power tower mod any m (power_tower), range gcd sparse table, trial-division factorize |
