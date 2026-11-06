@@ -1,0 +1,83 @@
+const int LOG = 20;
+vvi up;
+vi depth;
+vvi mx;
+
+void build_lca(const vvi &g, int root, map<pi, int> &wt)
+{
+    int n = g.size();
+    up.assign(n, vi(LOG, root));
+    depth.assign(n, 0);
+    mx.assign(n, vi(LOG, 0));
+    vector<char> vis(n, 0);
+    vi st = {root};
+    vis[root] = 1;
+    while (!st.empty())
+    {
+        int u = st.back();
+        st.pop_back();
+        for (int v : g[u])
+        {
+            if (vis[v])
+                continue;
+            vis[v] = 1;
+            up[v][0] = u; // 2^0 th ancestor = parent
+            mx[v][0] = wt[{u, v}];
+            depth[v] = depth[u] + 1;
+            rep(j, 1, LOG)
+            {
+                mx[v][j] = max<ll>(mx[v][j - 1], mx[up[v][j - 1]][j - 1]);
+                up[v][j] = up[up[v][j - 1]][j - 1];
+            }
+            st.pb(v);
+        }
+    }
+}
+
+pi kth_ancestor(int u, int k)
+{
+    if (k > depth[u])
+        return {-1, -1};
+    int mxx = -1;
+    rep(j, 0, LOG) if (k >> j & 1)
+    {
+        mxx = max<ll>(mxx, mx[u][j]);
+        u = up[u][j];
+
+        // debug(u,j,mxx);
+    } // 19 = 16+2+1
+    return {u, mxx};
+}
+
+pi get_lca(int u, int v)
+{
+    int mxx = -1;
+    if (depth[u] < depth[v])
+        swap(u, v);
+    debug(u, v, mxx);
+    pi res = kth_ancestor(u, depth[u] - depth[v]);
+    mxx = res.second;
+    u = res.first;
+    if (u == v)
+        return res; // v is the parent of u, so lca(u,v)=v
+
+    for (int j = LOG - 1; j >= 0; j--)
+    {
+        if (up[u][j] != up[v][j]) // those ancestors are not the same, so below the lca
+        {
+            mxx = max<ll>(mxx, max<ll>(mx[u][j], mx[v][j]));
+            u = up[u][j];
+            v = up[v][j];
+
+            debug(u, v, mxx, mxx);
+        }
+    }
+    mxx = max<ll>(mxx, max<ll>(mx[u][0], mx[v][0]));
+    debug(u, v, mxx);
+    return {up[u][0], mxx}; // now they are just below lca
+}
+
+int dist(int u, int v)
+{
+    return depth[u] + depth[v] - 2 * depth[get_lca(u, v).first];
+}
