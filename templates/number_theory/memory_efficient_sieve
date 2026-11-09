@@ -1,0 +1,5 @@
+uint8_t w[M];                          // w[k] = number of distinct primes of k
+void sieve() {
+    for (int i = 2; i < M; i++)
+        if (!w[i]) for (int j = i; j < M; j += i) w[j]++;
+}
